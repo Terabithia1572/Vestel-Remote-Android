@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="vestel_red">#E50914</color>
+    <color name="vestel_dark_red">#B20710</color>
+    <color name="vestel_surface_dark">#121216</color>
+    <color name="vestel_background_dark">#0A0A0D</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- TV Screen Frame -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M24,30 L84,30 A6,6 0 0,1 90,36 L90,68 A6,6 0 0,1 84,74 L24,74 A6,6 0 0,1 18,68 L18,36 A6,6 0 0,1 24,30 Z" />
+    <path
+        android:fillColor="#1A1A22"
+        android:pathData="M26,34 L82,34 A3,3 0 0,1 85,37 L85,67 A3,3 0 0,1 82,70 L26,70 A3,3 0 0,1 23,67 L23,37 A3,3 0 0,1 26,34 Z" />
+    <!-- TV Stand -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M48,74 L60,74 L64,82 L44,82 Z" />
+    <!-- Remote Control overlay / Signal wave -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M42,48 A16,16 0 0,1 66,48" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M47,54 A8,8 0 0,1 61,54" />
+    <!-- Power dot -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M54,58 A2.5,2.5 0 1,1 54,63 A2.5,2.5 0 1,1 54,58 Z" />
+</vector>

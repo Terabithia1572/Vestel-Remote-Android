@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vestel Remote</string>
+    
+    <!-- Navigation Tabs -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_remote">Remote</string>
+    <string name="nav_touchpad">Touchpad</string>
+    <string name="nav_apps">Apps</string>
+    <string name="nav_inputs">Inputs</string>
+    <string name="nav_devices">Devices</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- TV Connection & Status -->
+    <string name="status_connected">Connected</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_pairing">Waiting for pairing…</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_standby">Standby mode</string>
+    <string name="status_error">Connection error</string>
+    <string name="default_tv_name">Vestel Android TV</string>
+    <string name="default_tv_model">55QG9960</string>
+
+    <!-- Home Dashboard -->
+    <string name="dashboard_title">Vestel TV Dashboard</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="volume">Volume Level</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="power_on">Turn On TV</string>
+    <string name="power_off">Power / Standby</string>
+    <string name="wol_wake">Wake via Wake-on-LAN</string>
+    <string name="current_app">Active Application</string>
+    <string name="current_input">Active Input</string>
+    <string name="network_ip">IP Address</string>
+    <string name="network_mac">MAC Address</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">Remote Control</string>
+    <string name="btn_up">Up</string>
+    <string name="btn_down">Down</string>
+    <string name="btn_left">Left</string>
+    <string name="btn_right">Right</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_home">Home</string>
+    <string name="btn_menu">Menu</string>
+    <string name="btn_assistant">Google Assistant</string>
+    <string name="btn_vol_up">Vol +</string>
+    <string name="btn_vol_down">Vol -</string>
+    <string name="btn_ch_up">CH +</string>
+    <string name="btn_ch_down">CH -</string>
+    <string name="btn_play_pause">Play / Pause</string>
+    <string name="btn_rewind">Rewind</string>
+    <string name="btn_fast_forward">Fast Forward</string>
+    <string name="btn_stop">Stop</string>
+    <string name="toggle_numpad">Number Pad</string>
+    <string name="toggle_color_keys">Color Keys</string>
+
+    <!-- Touchpad -->
+    <string name="touchpad_title">Precision Touchpad</string>
+    <string name="touchpad_hint">Swipe to navigate, tap to select</string>
+    <string name="touchpad_tap_to_click">Tap for OK / Select</string>
+
+    <!-- Applications -->
+    <string name="apps_title">Smart TV Apps</string>
+    <string name="apps_subtitle">Launch on Vestel Android TV</string>
+    <string name="app_youtube">YouTube</string>
+    <string name="app_netflix">Netflix</string>
+    <string name="app_prime">Prime Video</string>
+    <string name="app_disney">Disney+</string>
+    <string name="app_spotify">Spotify</string>
+    <string name="app_exxen">Exxen</string>
+    <string name="app_blutv">BluTV</string>
+    <string name="app_gain">Gain</string>
+    <string name="app_tod">TOD / beIN</string>
+    <string name="app_twitch">Twitch</string>
+    <string name="favorite_apps">Favorite Apps</string>
+    <string name="all_apps">All Apps</string>
+
+    <!-- HDMI / Inputs -->
+    <string name="inputs_title">Input Sources</string>
+    <string name="input_hdmi1">HDMI 1</string>
+    <string name="input_hdmi2">HDMI 2 (eARC)</string>
+    <string name="input_hdmi3">HDMI 3</string>
+    <string name="input_live_tv">Live TV / Antenna</string>
+    <string name="input_av">Composite / AV</string>
+
+    <!-- Devices Management & Pairing -->
+    <string name="devices_title">Device Management</string>
+    <string name="discovered_devices">Discovered TVs</string>
+    <string name="saved_devices">Saved Devices</string>
+    <string name="scan_network">Scan Network (mDNS / SSDP)</string>
+    <string name="scanning">Scanning…</string>
+    <string name="manual_connect">Manual IP Connection</string>
+    <string name="ip_hint">E.g. 192.168.1.150</string>
+    <string name="mac_hint">E.g. AA:BB:CC:DD:EE:FF (for WoL)</string>
+    <string name="device_name_hint">Television Name</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="pair_tv">Pair</string>
+    <string name="pairing_code_prompt">Enter Code Shown on TV Screen</string>
+    <string name="pairing_code_hint">6-character code (e.g. A1B2C3)</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="forget_device">Forget Device</string>
+    <string name="run_diagnostics">Run Diagnostics</string>
+    <string name="diagnostic_ports">Port Diagnostics (6466/6467/8008/9)</string>
+
+    <!-- Settings & About -->
+    <string name="settings_title">Settings</string>
+    <string name="setting_language">Language / Dil</string>
+    <string name="lang_tr">Türkçe (Varsayılan)</string>
+    <string name="lang_en">English</string>
+    <string name="setting_theme">Theme Mode</string>
+    <string name="theme_system">System Theme</string>
+    <string name="theme_dark">Dark Theme (AMOLED Black)</string>
+    <string name="theme_light">Light Theme</string>
+    <string name="setting_haptic">Haptic Feedback</string>
+    <string name="setting_mock_mode">Developer Mode (Virtual TV Mock)</string>
+    <string name="setting_mock_desc">Verify full UI and state without physical TV</string>
+    <string name="setting_event_log">Protocol Event Log</string>
+    <string name="setting_hw_checklist">Hardware Validation Checklist</string>
+
+    <!-- About Yunus İNAN & Project -->
+    <string name="about_title">About</string>
+    <string name="app_version_label">Version: 1.0.0 (Vestel 55QG9960 Compatible)</string>
+    <string name="developer_name">Developer: Yunus İNAN</string>
+    <string name="developer_github">GitHub: https://github.com/Terabithia1572</string>
+    <string name="developer_attribution">Android TV adaptation developed by Yunus İNAN.</string>
+    <string name="original_project_credit">Original reference architecture: Gabriel Greco (LGwebOS-menubar)</string>
+    <string name="rea_credit">Reverse engineering research framework: REA Framework</string>
+    <string name="disclaimer">This application is neither endorsed by nor affiliated with Vestel Elektronik Sanayi ve Ticaret A.Ş. Android TV and Google TV are registered trademarks of Google LLC. Released under the MIT License.</string>
+
+    <!-- Errors & Prompts -->
+    <string name="err_invalid_ip">Please enter a valid local IPv4 address (e.g., 192.168.1.50).</string>
+    <string name="err_connection_timeout">Could not connect to the television. Ensure TV is turned on and connected to the same Wi-Fi.</string>
+    <string name="err_pairing_failed">Pairing failed or was rejected on the TV.</string>
+    <string name="err_wol_sent">Wake-on-LAN signal broadcasted.</string>
+</resources>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vestel Remote</string>
+    
+    <!-- Navigation Tabs -->
+    <string name="nav_dashboard">Panel</string>
+    <string name="nav_remote">Kumanda</string>
+    <string name="nav_touchpad">Dokunmatik</string>
+    <string name="nav_apps">Uygulamalar</string>
+    <string name="nav_inputs">Girişler</string>
+    <string name="nav_devices">Cihazlar</string>
+    <string name="nav_settings">Ayarlar</string>
+
+    <!-- TV Connection & Status -->
+    <string name="status_connected">Bağlandı</string>
+    <string name="status_connecting">Bağlanıyor…</string>
+    <string name="status_pairing">Eşleştirme bekleniyor…</string>
+    <string name="status_disconnected">Bağlantı kesildi</string>
+    <string name="status_standby">Bekleme modu (Standby)</string>
+    <string name="status_error">Bağlantı hatası</string>
+    <string name="default_tv_name">Vestel Android TV</string>
+    <string name="default_tv_model">55QG9960</string>
+
+    <!-- Home Dashboard -->
+    <string name="dashboard_title">Vestel TV Kontrol Paneli</string>
+    <string name="quick_actions">Hızlı İşlemler</string>
+    <string name="volume">Ses Seviyesi</string>
+    <string name="mute">Sessiz</string>
+    <string name="unmute">Sesi Aç</string>
+    <string name="power_on">Televizyonu Aç</string>
+    <string name="power_off">Kapat / Bekleme</string>
+    <string name="wol_wake">Wake-on-LAN ile Aç</string>
+    <string name="current_app">Aktif Uygulama</string>
+    <string name="current_input">Aktif Giriş</string>
+    <string name="network_ip">IP Adresi</string>
+    <string name="network_mac">MAC Adresi</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">Uzaktan Kumanda</string>
+    <string name="btn_up">Yukarı</string>
+    <string name="btn_down">Aşağı</string>
+    <string name="btn_left">Sol</string>
+    <string name="btn_right">Sağ</string>
+    <string name="btn_ok">Tamam</string>
+    <string name="btn_back">Geri</string>
+    <string name="btn_home">Ana Sayfa</string>
+    <string name="btn_menu">Menü</string>
+    <string name="btn_assistant">Google Asistan</string>
+    <string name="btn_vol_up">Ses +</string>
+    <string name="btn_vol_down">Ses -</string>
+    <string name="btn_ch_up">Kanal +</string>
+    <string name="btn_ch_down">Kanal -</string>
+    <string name="btn_play_pause">Oynat / Duraklat</string>
+    <string name="btn_rewind">Geri Sar</string>
+    <string name="btn_fast_forward">İleri Sar</string>
+    <string name="btn_stop">Durdur</string>
+    <string name="toggle_numpad">Numara Tuşları</string>
+    <string name="toggle_color_keys">Renk Tuşları</string>
+
+    <!-- Touchpad -->
+    <string name="touchpad_title">Hassas Dokunmatik Yüzey</string>
+    <string name="touchpad_hint">Gezinmek için kaydırın, seçmek için dokunun</string>
+    <string name="touchpad_tap_to_click">Dokunarak Tamam / Seç</string>
+
+    <!-- Applications -->
+    <string name="apps_title">Akıllı TV Uygulamaları</string>
+    <string name="apps_subtitle">Vestel Android TV üzerinde başlat</string>
+    <string name="app_youtube">YouTube</string>
+    <string name="app_netflix">Netflix</string>
+    <string name="app_prime">Prime Video</string>
+    <string name="app_disney">Disney+</string>
+    <string name="app_spotify">Spotify</string>
+    <string name="app_exxen">Exxen</string>
+    <string name="app_blutv">BluTV</string>
+    <string name="app_gain">Gain</string>
+    <string name="app_tod">TOD / beIN</string>
+    <string name="app_twitch">Twitch</string>
+    <string name="favorite_apps">Favori Uygulamalar</string>
+    <string name="all_apps">Tüm Uygulamalar</string>
+
+    <!-- HDMI / Inputs -->
+    <string name="inputs_title">Giriş Kaynakları</string>
+    <string name="input_hdmi1">HDMI 1</string>
+    <string name="input_hdmi2">HDMI 2 (eARC)</string>
+    <string name="input_hdmi3">HDMI 3</string>
+    <string name="input_live_tv">Canlı TV / Uydu</string>
+    <string name="input_av">Kompozit / AV</string>
+
+    <!-- Devices Management & Pairing -->
+    <string name="devices_title">Cihaz Yönetimi</string>
+    <string name="discovered_devices">Ağdaki Televizyonlar</string>
+    <string name="saved_devices">Kayıtlı Cihazlar</string>
+    <string name="scan_network">Ağda Ara (mDNS / SSDP)</string>
+    <string name="scanning">Taranıyor…</string>
+    <string name="manual_connect">Manuel IP ile Bağlan</string>
+    <string name="ip_hint">Örn: 192.168.1.150</string>
+    <string name="mac_hint">Örn: AA:BB:CC:DD:EE:FF (WoL için)</string>
+    <string name="device_name_hint">Televizyon Adı</string>
+    <string name="connect">Bağlan</string>
+    <string name="disconnect">Bağlantıyı Kes</string>
+    <string name="pair_tv">Eşleştir</string>
+    <string name="pairing_code_prompt">TV Ekranındaki Kodu Girin</string>
+    <string name="pairing_code_hint">6 haneli kod (örn: A1B2C3)</string>
+    <string name="confirm">Onayla</string>
+    <string name="cancel">İptal</string>
+    <string name="forget_device">Cihazı Unut</string>
+    <string name="run_diagnostics">Ağ Teşhisi Başlat</string>
+    <string name="diagnostic_ports">Port Kontrolleri (6466/6467/8008/9)</string>
+
+    <!-- Settings & About -->
+    <string name="settings_title">Ayarlar</string>
+    <string name="setting_language">Dil / Language</string>
+    <string name="lang_tr">Türkçe (Varsayılan)</string>
+    <string name="lang_en">English</string>
+    <string name="setting_theme">Görünüm Teması</string>
+    <string name="theme_system">Sistem Teması</string>
+    <string name="theme_dark">Koyu Tema (AMOLED Siyah)</string>
+    <string name="theme_light">Açık Tema</string>
+    <string name="setting_haptic">Dokunsal Titreşim (Haptic)</string>
+    <string name="setting_mock_mode">Geliştirici Modu (Sanal TV Testi)</string>
+    <string name="setting_mock_desc">Fiziksel TV olmadan tüm UI ve mantığı doğrula</string>
+    <string name="setting_event_log">Protokol Olay Günlüğü</string>
+    <string name="setting_hw_checklist">Donanım Doğrulama Kontrol Listesi</string>
+
+    <!-- About Yunus İNAN & Project -->
+    <string name="about_title">Hakkında</string>
+    <string name="app_version_label">Sürüm: 1.0.0 (Vestel 55QG9960 Uyumlu)</string>
+    <string name="developer_name">Geliştirici: Yunus İNAN</string>
+    <string name="developer_github">GitHub: https://github.com/Terabithia1572</string>
+    <string name="developer_attribution">Geliştirme ve Android TV uyarlaması: Yunus İNAN</string>
+    <string name="original_project_credit">Orijinal referans mimarisi: Gabriel Greco (LGwebOS-menubar)</string>
+    <string name="rea_credit">Tersine mühendislik araştırma altyapısı: REA Framework</string>
+    <string name="disclaimer">Bu uygulama Vestel Elektronik Sanayi ve Ticaret A.Ş. tarafından resmi olarak desteklenmemekte veya onaylanmamaktadır. Android TV ve Google TV, Google LLC\'nin tescilli ticari markalarıdır. Proje MIT Lisansı ile açık kaynak olarak sunulmuştur.</string>
+
+    <!-- Errors & Prompts -->
+    <string name="err_invalid_ip">Lütfen geçerli bir yerel IPv4 adresi girin (örn: 192.168.1.50).</string>
+    <string name="err_connection_timeout">Televizyona bağlanılamadı. TV\'nin açık ve aynı Wi-Fi ağında olduğundan emin olun.</string>
+    <string name="err_pairing_failed">Eşleştirme başarısız oldu veya TV üzerinden reddedildi.</string>
+    <string name="err_wol_sent">Wake-on-LAN uyandırma sinyali gönderildi.</string>
+</resources>
