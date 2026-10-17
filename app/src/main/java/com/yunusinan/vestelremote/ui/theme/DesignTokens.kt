@@ -1,10 +1,12 @@
 package com.yunusinan.vestelremote.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * Reusable design system tokens for Vestel Remote (AMOLED Dark & Red Accent UI).
+ * Reusable design system tokens for Vestel Remote (Reference AMOLED Dark & Red Accent UI).
  */
 object VestelDesignTokens {
 
@@ -26,10 +28,10 @@ object VestelDesignTokens {
         val xl = 24.dp
         val pill = 34.dp
 
-        val cardShape = RoundedCornerShape(lg)
-        val heroCardShape = RoundedCornerShape(22.dp)
-        val compactCardShape = RoundedCornerShape(md)
-        val buttonShape = RoundedCornerShape(sm)
+        val cardShape = RoundedCornerShape(18.dp)
+        val heroCardShape = RoundedCornerShape(20.dp)
+        val compactCardShape = RoundedCornerShape(16.dp)
+        val buttonShape = RoundedCornerShape(12.dp)
         val pillShape = RoundedCornerShape(pill)
     }
 
@@ -42,14 +44,14 @@ object VestelDesignTokens {
 
     object Dimensions {
         val minTouchTarget = 48.dp
-        val quickActionButtonSize = 48.dp
-        val remoteRoundButtonSize = 52.dp
+        val quickActionButtonSize = 52.dp
+        val remoteRoundButtonSize = 54.dp
         val numpadButtonSize = 56.dp
-        val rockerWidth = 66.dp
-        val rockerHeight = 144.dp
-        val dpadSize = 228.dp
-        val touchpadHeight = 236.dp
-        val bottomNavHeight = 68.dp
+        val rockerWidth = 58.dp
+        val rockerHeight = 148.dp
+        val dpadSize = 204.dp
+        val touchpadHeight = 204.dp
+        val bottomNavHeight = 66.dp
     }
 
     object IconSize {
@@ -59,4 +61,14 @@ object VestelDesignTokens {
         val lg = 26.dp
         val xl = 32.dp
     }
+
+    object Gradients {
+        val screenBackground = Brush.verticalGradient(
+            colors = listOf(DarkBackgroundTop, DarkBackground)
+        )
+        val cardSurface = Brush.verticalGradient(
+            colors = listOf(Color(0xFF191D28), Color(0xFF13161F))
+        )
+    }
 }
+

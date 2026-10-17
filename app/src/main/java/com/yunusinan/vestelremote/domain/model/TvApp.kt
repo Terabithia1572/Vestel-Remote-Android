@@ -38,31 +38,22 @@ data class TvApp(
     companion object {
         val DEFAULT_CATALOG = listOf(
             TvApp(
-                id = "youtube",
-                name = "YouTube",
-                packageName = "com.google.android.youtube.tv",
-                dialName = "YouTube",
-                deepLinkUri = "vnd.youtube://",
-                isFavorite = true,
-                category = "Video & TV"
-            ),
-            TvApp(
                 id = "netflix",
                 name = "Netflix",
                 packageName = "com.netflix.ninja",
                 dialName = "Netflix",
                 deepLinkUri = "https://www.netflix.com/title/",
                 isFavorite = true,
-                category = "Dizi & Film"
+                category = "Streaming"
             ),
             TvApp(
-                id = "prime_video",
-                name = "Prime Video",
-                packageName = "com.amazon.amazonvideo.livingroom",
-                dialName = "AmazonInstantVideo",
-                deepLinkUri = "https://app.primevideo.com",
+                id = "youtube",
+                name = "YouTube",
+                packageName = "com.google.android.youtube.tv",
+                dialName = "YouTube",
+                deepLinkUri = "vnd.youtube://",
                 isFavorite = true,
-                category = "Dizi & Film"
+                category = "Streaming"
             ),
             TvApp(
                 id = "disney_plus",
@@ -71,7 +62,61 @@ data class TvApp(
                 dialName = "DisneyPlus",
                 deepLinkUri = "https://www.disneyplus.com",
                 isFavorite = true,
-                category = "Dizi & Film"
+                category = "Streaming"
+            ),
+            TvApp(
+                id = "prime_video",
+                name = "Prime Video",
+                packageName = "com.amazon.amazonvideo.livingroom",
+                dialName = "AmazonInstantVideo",
+                deepLinkUri = "https://app.primevideo.com",
+                isFavorite = true,
+                category = "Streaming"
+            ),
+            TvApp(
+                id = "exxen",
+                name = "Exxen",
+                packageName = "com.exxen.android.tv",
+                dialName = "Exxen",
+                deepLinkUri = "https://www.exxen.com",
+                isFavorite = false,
+                category = "Streaming"
+            ),
+            TvApp(
+                id = "blutv",
+                name = "BluTV",
+                packageName = "com.blutv.android.tv",
+                dialName = "BluTV",
+                deepLinkUri = "https://www.blutv.com",
+                isFavorite = false,
+                category = "Streaming"
+            ),
+            TvApp(
+                id = "youtube_music",
+                name = "YouTube Music",
+                packageName = "com.google.android.youtube.tvmusic",
+                dialName = "YouTubeMusic",
+                deepLinkUri = "https://music.youtube.com",
+                isFavorite = false,
+                category = "Müzik"
+            ),
+            TvApp(
+                id = "tabii",
+                name = "Tabii",
+                packageName = "com.trt.tabii.androidtv",
+                dialName = "tabii",
+                deepLinkUri = "https://www.tabii.com",
+                isFavorite = false,
+                category = "Streaming"
+            ),
+            TvApp(
+                id = "trt_izle",
+                name = "TRT İzle",
+                packageName = "com.trt.trtizle.tv",
+                dialName = null,
+                deepLinkUri = "https://www.tabii.com",
+                isFavorite = false,
+                category = "Streaming"
             ),
             TvApp(
                 id = "spotify",
@@ -83,31 +128,76 @@ data class TvApp(
                 category = "Müzik"
             ),
             TvApp(
-                id = "tabii",
-                name = "TRT tabii",
-                packageName = "com.trt.tabii.androidtv",
-                dialName = "tabii",
-                deepLinkUri = "https://www.tabii.com",
+                id = "plex",
+                name = "Plex",
+                packageName = "com.plexapp.android",
+                dialName = "Plex",
+                deepLinkUri = "plex://",
                 isFavorite = false,
-                category = "Yerli Platform"
+                category = "Sistem"
             ),
             TvApp(
-                id = "exxen",
-                name = "Exxen",
-                packageName = "com.exxen.android.tv",
-                dialName = "Exxen",
-                deepLinkUri = "https://www.exxen.com",
+                id = "kodi",
+                name = "Kodi",
+                packageName = "org.xbmc.kodi",
+                dialName = null,
+                deepLinkUri = "market://details?id=org.xbmc.kodi",
                 isFavorite = false,
-                category = "Yerli Platform"
+                category = "Sistem"
             ),
             TvApp(
-                id = "blutv",
-                name = "BluTV / Max",
-                packageName = "com.blutv.android.tv",
-                dialName = "BluTV",
-                deepLinkUri = "https://www.blutv.com",
+                id = "internet",
+                name = "İnternet",
+                packageName = "com.vewd.core.integration.dia",
+                dialName = null,
+                deepLinkUri = "https://www.google.com",
                 isFavorite = false,
-                category = "Yerli Platform"
+                category = "Sistem"
+            ),
+            TvApp(
+                id = "file_manager",
+                name = "Dosya Yöneticisi",
+                packageName = "com.android.documentsui",
+                dialName = null,
+                deepLinkUri = "market://search?q=file+manager&c=apps",
+                isFavorite = false,
+                category = "Sistem"
+            ),
+            TvApp(
+                id = "media_player",
+                name = "Medya Oynatıcı",
+                packageName = "org.videolan.vlc",
+                dialName = null,
+                deepLinkUri = "market://details?id=org.videolan.vlc",
+                isFavorite = false,
+                category = "Sistem"
+            ),
+            TvApp(
+                id = "spotify_tv",
+                name = "Spotify TV",
+                packageName = "com.spotify.tv.android",
+                dialName = "Spotify",
+                deepLinkUri = "https://open.spotify.com",
+                isFavorite = false,
+                category = "Müzik"
+            ),
+            TvApp(
+                id = "steam_link",
+                name = "Steam Link",
+                packageName = "com.valvesoftware.steamlink",
+                dialName = null,
+                deepLinkUri = "market://details?id=com.valvesoftware.steamlink",
+                isFavorite = false,
+                category = "Sistem"
+            ),
+            TvApp(
+                id = "tv_settings",
+                name = "Ayarlar",
+                packageName = "com.android.tv.settings",
+                dialName = null,
+                deepLinkUri = "https://support.google.com/androidtv",
+                isFavorite = false,
+                category = "Sistem"
             ),
             TvApp(
                 id = "gain",
@@ -116,7 +206,7 @@ data class TvApp(
                 dialName = "Gain",
                 deepLinkUri = "https://www.gain.tv",
                 isFavorite = false,
-                category = "Yerli Platform"
+                category = "Streaming"
             ),
             TvApp(
                 id = "tod",
@@ -125,7 +215,7 @@ data class TvApp(
                 dialName = "TOD",
                 deepLinkUri = "https://www.todtv.com.tr",
                 isFavorite = false,
-                category = "Spor & Canlı"
+                category = "Streaming"
             ),
             TvApp(
                 id = "twitch",
@@ -134,17 +224,9 @@ data class TvApp(
                 dialName = "Twitch",
                 deepLinkUri = "twitch://",
                 isFavorite = false,
-                category = "Canlı Yayın"
-            ),
-            TvApp(
-                id = "youtube_music",
-                name = "YouTube Music",
-                packageName = "com.google.android.youtube.tvmusic",
-                dialName = "YouTubeMusic",
-                deepLinkUri = "https://music.youtube.com",
-                isFavorite = false,
-                category = "Müzik"
+                category = "Streaming"
             )
         )
     }
 }
+

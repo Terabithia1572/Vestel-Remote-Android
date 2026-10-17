@@ -36,11 +36,13 @@ sealed class TvCommand(val name: String, val androidKeyCode: Int) {
     object Yellow : TvCommand("PROG_YELLOW", 185)
     object Blue : TvCommand("PROG_BLUE", 186)
 
-    // Info & Guide
+    // Info, Guide & Captions
     object Info : TvCommand("INFO", 165)
     object Guide : TvCommand("GUIDE", 172)
+    object Captions : TvCommand("CAPTIONS", 175)
     object Input : TvCommand("TV_INPUT", 178)
 
     // Numeric keypad
     data class Number(val digit: Int) : TvCommand("NUM_$digit", 7 + (digit % 10))
 }
+

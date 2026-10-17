@@ -39,6 +39,7 @@ data class MainUiState(
     val hapticsEnabled: Boolean = true,
     val isMockMode: Boolean = false,
     val selectedTab: Int = 0,
+    val showDevicesScreen: Boolean = false,
     val pairingPromptDevice: TvDevice? = null,
     val activeDiagnostics: TvDiagnostics? = null
 )
@@ -204,9 +205,27 @@ class MainViewModel(
 
     fun onTabSelected(tabIndex: Int) {
         triggerHaptic()
-        _uiState.update { it.copy(selectedTab = tabIndex) }
+        _uiState.update { it.copy(selectedTab = tabIndex, showDevicesScreen = false) }
         if (tabIndex == 2 && _uiState.value.connectionStatus.isConnected) {
             onRefreshInstalledApps()
+        }
+    }
+
+    fun onOpenDevicesScreen() {
+        triggerHaptic()
+        _uiState.update { it.copy(showDevicesScreen = true) }
+    }
+
+    fun onCloseDevicesScreen() {
+        triggerHaptic()
+        _uiState.update { it.copy(showDevicesScreen = false) }
+    }
+
+    fun onLaunchAppById(appId: String) {
+        val app = _uiState.value.appCatalog.firstOrNull { it.id == appId }
+            ?: TvApp.DEFAULT_CATALOG.firstOrNull { it.id == appId }
+        if (app != null) {
+            onLaunchApp(app)
         }
     }
 

@@ -48,6 +48,7 @@ fun DevicesScreen(
     onForgetDevice: (String) -> Unit,
     onRunDiagnostics: (String) -> Unit,
     onManualConnect: (ip: String, mac: String, name: String) -> Unit,
+    onBackClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var manualIp by remember { mutableStateOf("") }
@@ -61,17 +62,37 @@ fun DevicesScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
+            .background(VestelDesignTokens.Gradients.screenBackground)
             .padding(horizontal = VestelDesignTokens.Spacing.lg, vertical = VestelDesignTokens.Spacing.sm),
         verticalArrangement = Arrangement.spacedBy(VestelDesignTokens.Spacing.md)
     ) {
-        // Redesigned Header Hierarchy: Title + Subtitle + Dedicated Action Row
+        // Redesigned Header Hierarchy: Back Button + Title + Subtitle + Dedicated Action Row
         item {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.devices_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.White
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (onBackClick != null) {
+                        IconButton(
+                            onClick = onBackClick,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = stringResource(R.string.btn_back),
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+                    Text(
+                        text = stringResource(R.string.devices_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.devices_subtitle),

@@ -42,6 +42,7 @@ fun RoundIconButton(
     iconSize: Dp = 23.dp,
     tint: Color = Color.White.copy(alpha = 0.88f),
     backgroundColor: Color = DarkSurfaceElevated,
+    borderColor: Color = DarkBorder,
     activeTintColor: Color = VestelRed
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -56,7 +57,7 @@ fun RoundIconButton(
             .background(if (isPressed) backgroundColor.copy(alpha = 0.65f) else backgroundColor)
             .border(
                 width = 1.dp,
-                color = if (isPressed) activeTintColor.copy(alpha = 0.45f) else DarkBorder,
+                color = if (isPressed) activeTintColor.copy(alpha = 0.45f) else borderColor,
                 shape = CircleShape
             )
             .clickable(

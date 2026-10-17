@@ -6,11 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Input
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsRemote
@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -42,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yunusinan.vestelremote.R
 import com.yunusinan.vestelremote.ui.theme.DarkBorder
-import com.yunusinan.vestelremote.ui.theme.DarkSurfaceElevated
+import com.yunusinan.vestelremote.ui.theme.DarkSurface
 import com.yunusinan.vestelremote.ui.theme.DarkTextSecondary
 import com.yunusinan.vestelremote.ui.theme.VestelRed
 
@@ -53,23 +54,16 @@ data class BottomNavDestination(
 )
 
 private val Destinations = listOf(
-    BottomNavDestination(0, Icons.Default.Dashboard, R.string.nav_dashboard),
+    BottomNavDestination(0, Icons.Default.GridView, R.string.nav_dashboard),
     BottomNavDestination(1, Icons.Default.SettingsRemote, R.string.nav_remote),
     BottomNavDestination(2, Icons.Default.Apps, R.string.nav_apps),
     BottomNavDestination(3, Icons.Default.Input, R.string.nav_inputs),
-    BottomNavDestination(4, Icons.Default.Devices, R.string.nav_devices),
-    BottomNavDestination(5, Icons.Default.Settings, R.string.nav_settings)
+    BottomNavDestination(4, Icons.Default.Settings, R.string.nav_settings)
 )
 
 /**
- * Adaptive 6-destination bottom navigation bar designed so long Turkish labels
- * such as "Uygulamalar" stay on a single line with aligned icons and labels.
- *
- * - On standard/wide screens (including Samsung Galaxy S24 Ultra), all 6 destinations
- *   render single-line labels with adaptive typography and minimal horizontal cell padding.
- * - On ultra-compact widths or very large accessibility font scales (`effectiveSlotWidth < 50.dp`),
- *   it switches to an adaptive compact mode where the active destination displays its full
- *   single-line label and inactive tabs preserve full TalkBack accessibility semantics.
+ * 5-destination bottom navigation bar matching the reference design:
+ * Panel, Kumanda, Uygulamalar, Girişler, Ayarlar.
  */
 @Composable
 fun VestelBottomNavigationBar(
@@ -79,8 +73,8 @@ fun VestelBottomNavigationBar(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = DarkSurfaceElevated,
-        tonalElevation = 6.dp
+        color = DarkSurface,
+        tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
@@ -89,24 +83,23 @@ fun VestelBottomNavigationBar(
         ) {
             HorizontalDivider(
                 thickness = 0.5.dp,
-                color = DarkBorder.copy(alpha = 0.7f)
+                color = DarkBorder.copy(alpha = 0.85f)
             )
 
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(66.dp)
-                    .padding(horizontal = 4.dp)
+                    .height(64.dp)
+                    .padding(horizontal = 6.dp)
             ) {
                 val fontScale = LocalDensity.current.fontScale.coerceAtLeast(0.85f)
                 val slotWidth = maxWidth / Destinations.size
                 val effectiveSlotWidth = slotWidth / fontScale
 
-                // Deliberate adaptive fallback when 6 full labels cannot fit readably
-                val showAllLabels = effectiveSlotWidth >= 48.dp
+                val showAllLabels = effectiveSlotWidth >= 46.dp
                 val adaptiveFontSize = when {
-                    effectiveSlotWidth >= 62.dp -> 10.5.sp
-                    effectiveSlotWidth >= 54.dp -> 10.sp
+                    effectiveSlotWidth >= 68.dp -> 11.sp
+                    effectiveSlotWidth >= 56.dp -> 10.5.sp
                     else -> 9.5.sp
                 }
 
@@ -117,7 +110,7 @@ fun VestelBottomNavigationBar(
                     Destinations.forEach { destination ->
                         val isSelected = selectedTab == destination.index
                         val label = stringResource(destination.labelResId)
-                        val itemWeight = if (!showAllLabels && isSelected) 1.55f else 1f
+                        val itemWeight = if (!showAllLabels && isSelected) 1.45f else 1f
 
                         VestelBottomNavItem(
                             icon = destination.icon,
@@ -148,20 +141,21 @@ private fun VestelBottomNavItem(
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val inactiveColor = Color(0xFFA6ADBB)
     val iconTint by animateColorAsState(
-        targetValue = if (isSelected) VestelRed else DarkTextSecondary,
+        targetValue = if (isSelected) VestelRed else inactiveColor,
         label = "navIconTint"
     )
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) VestelRed else DarkTextSecondary,
+        targetValue = if (isSelected) VestelRed else inactiveColor,
         label = "navTextColor"
     )
-    val indicatorAlpha by animateFloatAsState(
-        targetValue = if (isSelected) 0.16f else 0f,
-        label = "navIndicatorAlpha"
+    val glowAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 0.34f else 0f,
+        label = "navGlowAlpha"
     )
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.02f else 1f,
+        targetValue = if (isSelected) 1.03f else 1f,
         label = "navItemScale"
     )
 
@@ -179,28 +173,35 @@ private fun VestelBottomNavItem(
                 this.selected = isSelected
                 contentDescription = label
             }
-            .padding(horizontal = 2.dp, vertical = 6.dp),
+            .padding(horizontal = 2.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
-                .width(44.dp)
-                .height(28.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(VestelRed.copy(alpha = indicatorAlpha)),
+                .size(34.dp)
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            VestelRed.copy(alpha = glowAlpha),
+                            VestelRed.copy(alpha = glowAlpha * 0.35f),
+                            Color.Transparent
+                        )
+                    ),
+                    shape = CircleShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(21.dp)
+                modifier = Modifier.size(22.dp)
             )
         }
 
         if (showLabel) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
                 color = textColor,
@@ -208,7 +209,7 @@ private fun VestelBottomNavItem(
                     fontSize = labelFontSize,
                     lineHeight = 12.sp,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                    letterSpacing = (-0.15).sp
+                    letterSpacing = (-0.1).sp
                 ),
                 maxLines = 1,
                 softWrap = false,
@@ -219,3 +220,4 @@ private fun VestelBottomNavItem(
         }
     }
 }
+

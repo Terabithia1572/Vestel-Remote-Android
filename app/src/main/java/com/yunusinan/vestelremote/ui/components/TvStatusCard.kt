@@ -2,11 +2,13 @@ package com.yunusinan.vestelremote.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Tv
@@ -30,20 +32,17 @@ import com.yunusinan.vestelremote.domain.model.ConnectionStatus
 import com.yunusinan.vestelremote.domain.model.TvDevice
 import com.yunusinan.vestelremote.ui.theme.*
 
+/**
+ * Reference Dashboard Top Card: Compact connected-TV information card with
+ * red TV badge on left, device title & model+IP subtitle in center,
+ * cyan-ringed power control on right, and connection status bar below divider.
+ */
 @Composable
 fun TvStatusCard(
     device: TvDevice?,
     connectionStatus: ConnectionStatus,
-    volume: Int,
-    isVolumeReportedByTv: Boolean,
-    isMuted: Boolean,
-    currentApp: String,
     onPowerClick: () -> Unit,
-    onMuteClick: () -> Unit,
-    onVolumeChange: (Int) -> Unit,
-    onVolumeChangeFinished: () -> Unit,
-    onVolumeDownClick: () -> Unit,
-    onVolumeUpClick: () -> Unit,
+    onDeviceClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isConnected = connectionStatus.isConnected
@@ -53,56 +52,66 @@ fun TvStatusCard(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = if (isConnected) StatusGreen.copy(alpha = 0.22f) else DarkBorder,
+                color = DarkBorder,
                 shape = VestelDesignTokens.Radius.heroCardShape
-            ),
+            )
+            .clip(VestelDesignTokens.Radius.heroCardShape)
+            .clickable(onClick = onDeviceClick),
         shape = VestelDesignTokens.Radius.heroCardShape,
         colors = CardDefaults.cardColors(containerColor = DarkSurfaceElevated)
     ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            // Header Row: TV Icon, Device Identity & Power Action
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Top Row: Red TV Badge, Device Identity & Cyan Power Button
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            if (isConnected) StatusGreen.copy(alpha = 0.14f)
-                            else VestelRed.copy(alpha = 0.14f)
-                        ),
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(VestelRed.copy(alpha = 0.15f))
+                        .border(0.5.dp, VestelRed.copy(alpha = 0.32f), RoundedCornerShape(13.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Tv,
                         contentDescription = null,
-                        tint = if (isConnected) StatusGreen else VestelRed,
-                        modifier = Modifier.size(26.dp)
+                        tint = VestelRed,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(13.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = device?.displayTitle ?: stringResource(R.string.default_tv_name),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
                         color = Color.White,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     val subtitleText = if (device != null) {
-                        val modelLabel = device.model.takeIf { it.isNotBlank() } ?: "Android TV"
-                        "$modelLabel • ${device.ipAddress}"
+                        val rawModel = device.model.ifBlank { "55QG9960" }
+                        val formattedModel = if (rawModel.startsWith("Vestel", ignoreCase = true)) {
+                            rawModel
+                        } else {
+                            "Vestel $rawModel"
+                        }
+                        "$formattedModel • ${device.ipAddress}"
                     } else {
-                        "Eşleştirilmiş TV seçilmedi • Cihazlar sekmesinden bağlanın"
+                        "Cihaz seçilmedi • Bağlanmak için dokunun"
                     }
                     Text(
                         text = subtitleText,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                         color = DarkTextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -111,20 +120,35 @@ fun TvStatusCard(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                RoundIconButton(
-                    icon = Icons.Default.PowerSettingsNew,
-                    contentDescription = stringResource(R.string.power_off),
-                    onClick = onPowerClick,
-                    size = 44.dp,
-                    iconSize = 22.dp,
-                    tint = if (isConnected) StatusGreen else VestelRed,
-                    backgroundColor = Color.White.copy(alpha = 0.08f)
-                )
+                // Prominent cyan/teal power button matching reference
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(if (isConnected) PowerCyanSurface else DarkControlSurface)
+                        .border(
+                            width = 1.2.dp,
+                            color = if (isConnected) PowerCyan.copy(alpha = 0.7f) else VestelRed.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                        .clickable(onClick = onPowerClick),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PowerSettingsNew,
+                        contentDescription = stringResource(R.string.power_off),
+                        tint = if (isConnected) PowerCyan else VestelRed,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            HorizontalDivider(
+                thickness = 0.6.dp,
+                color = DarkDivider
+            )
 
-            // Connection Status & Session Pill Row
+            // Bottom Status Row: Status Dot + Status Label on Left, "Vestel TV" on Right
             val (badgeColor, badgeText) = when (connectionStatus) {
                 is ConnectionStatus.Connected -> Pair(StatusGreen, stringResource(R.string.status_connected))
                 is ConnectionStatus.Connecting,
@@ -146,9 +170,7 @@ fun TvStatusCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.04f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -165,7 +187,10 @@ fun TvStatusCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = badgeText,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
                         color = badgeColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -174,127 +199,176 @@ fun TvStatusCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
-                    text = if (isConnected) currentApp else "Oturum Yok",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (isConnected) Color.White.copy(alpha = 0.85f) else DarkTextMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Volume Header Row: Label, Sync Badge & Aligned Percentage
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.volume),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = DarkTextSecondary
+                        text = if (device != null) "Vestel TV" else stringResource(R.string.nav_devices),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = Color.White.copy(alpha = 0.9f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    val modeText = if (isConnected && isVolumeReportedByTv) {
-                        stringResource(R.string.volume_tv_synced)
-                    } else {
-                        stringResource(R.string.volume_step_mode)
-                    }
-                    val modeColor = if (isConnected && isVolumeReportedByTv) StatusGreen else DarkTextMuted
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(modeColor.copy(alpha = 0.14f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = modeText,
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            color = modeColor
+                    if (!isConnected) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = DarkTextSecondary,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
-                }
-
-                val volumeDisplayText = when {
-                    isMuted -> stringResource(R.string.mute).uppercase()
-                    isConnected && isVolumeReportedByTv -> "%$volume"
-                    else -> "~%$volume"
-                }
-
-                Text(
-                    text = volumeDisplayText,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isMuted) VestelRed else Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Stabilized Volume Slider & Precision Step Buttons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onMuteClick,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = when {
-                            isMuted -> Icons.Default.VolumeMute
-                            volume > 50 -> Icons.Default.VolumeUp
-                            else -> Icons.Default.VolumeDown
-                        },
-                        contentDescription = stringResource(if (isMuted) R.string.unmute else R.string.mute),
-                        tint = if (isMuted) VestelRed else Color.White.copy(alpha = 0.85f),
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = onVolumeDownClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Remove,
-                        contentDescription = stringResource(R.string.btn_vol_down),
-                        tint = DarkTextSecondary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                Slider(
-                    value = volume.toFloat(),
-                    onValueChange = { onVolumeChange(it.toInt()) },
-                    onValueChangeFinished = onVolumeChangeFinished,
-                    valueRange = 0f..100f,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp),
-                    colors = SliderDefaults.colors(
-                        thumbColor = VestelRed,
-                        activeTrackColor = VestelRed,
-                        inactiveTrackColor = Color.White.copy(alpha = 0.15f)
-                    )
-                )
-
-                IconButton(
-                    onClick = onVolumeUpClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.btn_vol_up),
-                        tint = DarkTextSecondary,
-                        modifier = Modifier.size(18.dp)
-                    )
                 }
             }
         }
     }
 }
+
+/**
+ * Reference Dashboard Separate Horizontal Volume Card:
+ * Speaker icon, circular [-] button, red-track Slider with white thumb, percentage text, and circular [+] button.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VolumeControlCard(
+    volume: Int,
+    isMuted: Boolean,
+    onMuteClick: () -> Unit,
+    onVolumeChange: (Int) -> Unit,
+    onVolumeChangeFinished: () -> Unit,
+    onVolumeDownClick: () -> Unit,
+    onVolumeUpClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(1.dp, DarkBorder, VestelDesignTokens.Radius.cardShape),
+        shape = VestelDesignTokens.Radius.cardShape,
+        colors = CardDefaults.cardColors(containerColor = DarkSurfaceElevated)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onMuteClick,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = when {
+                        isMuted -> Icons.Default.VolumeMute
+                        volume > 50 -> Icons.Default.VolumeUp
+                        else -> Icons.Default.VolumeDown
+                    },
+                    contentDescription = stringResource(if (isMuted) R.string.unmute else R.string.mute),
+                    tint = if (isMuted) VestelRed else Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier.size(21.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Circular Minus Button
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(DarkControlSurface)
+                    .border(1.dp, DarkControlBorder, CircleShape)
+                    .clickable(onClick = onVolumeDownClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = stringResource(R.string.btn_vol_down),
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Slider(
+                value = volume.toFloat(),
+                onValueChange = { onVolumeChange(it.toInt()) },
+                onValueChangeFinished = onVolumeChangeFinished,
+                valueRange = 0f..100f,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(32.dp),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.White,
+                    activeTrackColor = VestelRed,
+                    inactiveTrackColor = Color(0xFF282E3D)
+                ),
+                thumb = {
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .border(1.dp, Color.White.copy(alpha = 0.85f), CircleShape)
+                    )
+                },
+                track = { sliderState ->
+                    val fraction = ((sliderState.value - sliderState.valueRange.start) /
+                        (sliderState.valueRange.endInclusive - sliderState.valueRange.start)).coerceIn(0f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(Color(0xFF282E3D))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(VestelRed)
+                        )
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = if (isMuted) stringResource(R.string.mute) else "%$volume",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = if (isMuted) VestelRed else Color.White.copy(alpha = 0.92f),
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                modifier = Modifier.widthIn(min = 34.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Circular Plus Button
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(DarkControlSurface)
+                    .border(1.dp, DarkControlBorder, CircleShape)
+                    .clickable(onClick = onVolumeUpClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.btn_vol_up),
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+

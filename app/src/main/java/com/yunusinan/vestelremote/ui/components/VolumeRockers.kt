@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,19 +25,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yunusinan.vestelremote.ui.theme.DarkBorder
+import com.yunusinan.vestelremote.ui.theme.DarkControlBorder
 import com.yunusinan.vestelremote.ui.theme.DarkSurfaceElevated
+import com.yunusinan.vestelremote.ui.theme.DarkTextSecondary
 import com.yunusinan.vestelremote.ui.theme.VestelDesignTokens
 import com.yunusinan.vestelremote.ui.theme.VestelRed
 
 @Composable
 fun RockerPill(
-    label: String,
+    label: String = "Ses",
     onUpClick: () -> Unit,
     onDownClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val pillShape = RoundedCornerShape(33.dp)
+    val pillShape = RoundedCornerShape(30.dp)
 
     Column(
         modifier = modifier
@@ -46,8 +46,8 @@ fun RockerPill(
             .height(VestelDesignTokens.Dimensions.rockerHeight)
             .clip(pillShape)
             .background(DarkSurfaceElevated)
-            .border(1.dp, DarkBorder, pillShape)
-            .padding(vertical = 6.dp),
+            .border(1.dp, DarkControlBorder, pillShape)
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -57,7 +57,7 @@ fun RockerPill(
 
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(46.dp)
                 .scale(upScale)
                 .clickable(
                     interactionSource = upInteraction,
@@ -69,29 +69,19 @@ fun RockerPill(
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "$label +",
-                tint = if (upPressed) VestelRed else Color.White.copy(alpha = 0.88f),
-                modifier = Modifier.size(24.dp)
+                tint = if (upPressed) VestelRed else Color.White.copy(alpha = 0.92f),
+                modifier = Modifier.size(23.dp)
             )
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(0.55f)
-        ) {
-            HorizontalDivider(thickness = 0.5.dp, color = Color.White.copy(alpha = 0.08f))
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.6.sp
-                ),
-                color = Color.White.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            HorizontalDivider(thickness = 0.5.dp, color = Color.White.copy(alpha = 0.08f))
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            color = DarkTextSecondary
+        )
 
         val downInteraction = remember { MutableInteractionSource() }
         val downPressed by downInteraction.collectIsPressedAsState()
@@ -99,7 +89,7 @@ fun RockerPill(
 
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(46.dp)
                 .scale(downScale)
                 .clickable(
                     interactionSource = downInteraction,
@@ -111,8 +101,8 @@ fun RockerPill(
             Icon(
                 imageVector = Icons.Default.Remove,
                 contentDescription = "$label -",
-                tint = if (downPressed) VestelRed else Color.White.copy(alpha = 0.88f),
-                modifier = Modifier.size(24.dp)
+                tint = if (downPressed) VestelRed else Color.White.copy(alpha = 0.92f),
+                modifier = Modifier.size(23.dp)
             )
         }
     }
@@ -120,12 +110,12 @@ fun RockerPill(
 
 @Composable
 fun ChannelRockerPill(
-    label: String = "CH",
+    label: String = "Kanal",
     onUpClick: () -> Unit,
     onDownClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val pillShape = RoundedCornerShape(33.dp)
+    val pillShape = RoundedCornerShape(30.dp)
 
     Column(
         modifier = modifier
@@ -133,8 +123,8 @@ fun ChannelRockerPill(
             .height(VestelDesignTokens.Dimensions.rockerHeight)
             .clip(pillShape)
             .background(DarkSurfaceElevated)
-            .border(1.dp, DarkBorder, pillShape)
-            .padding(vertical = 6.dp),
+            .border(1.dp, DarkControlBorder, pillShape)
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -144,7 +134,7 @@ fun ChannelRockerPill(
 
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(46.dp)
                 .scale(upScale)
                 .clickable(
                     interactionSource = upInteraction,
@@ -156,29 +146,19 @@ fun ChannelRockerPill(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = "Kanal +",
-                tint = if (upPressed) VestelRed else Color.White.copy(alpha = 0.88f),
-                modifier = Modifier.size(28.dp)
+                tint = if (upPressed) VestelRed else Color.White.copy(alpha = 0.92f),
+                modifier = Modifier.size(26.dp)
             )
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(0.55f)
-        ) {
-            HorizontalDivider(thickness = 0.5.dp, color = Color.White.copy(alpha = 0.08f))
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.6.sp
-                ),
-                color = Color.White.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            HorizontalDivider(thickness = 0.5.dp, color = Color.White.copy(alpha = 0.08f))
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            color = DarkTextSecondary
+        )
 
         val downInteraction = remember { MutableInteractionSource() }
         val downPressed by downInteraction.collectIsPressedAsState()
@@ -186,7 +166,7 @@ fun ChannelRockerPill(
 
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(46.dp)
                 .scale(downScale)
                 .clickable(
                     interactionSource = downInteraction,
@@ -198,9 +178,10 @@ fun ChannelRockerPill(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "Kanal -",
-                tint = if (downPressed) VestelRed else Color.White.copy(alpha = 0.88f),
-                modifier = Modifier.size(28.dp)
+                tint = if (downPressed) VestelRed else Color.White.copy(alpha = 0.92f),
+                modifier = Modifier.size(26.dp)
             )
         }
     }
 }
+
