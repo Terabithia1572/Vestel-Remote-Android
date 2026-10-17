@@ -2,6 +2,7 @@ package com.yunusinan.vestelremote.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -20,17 +21,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yunusinan.vestelremote.R
 import com.yunusinan.vestelremote.domain.model.TvCommand
 import com.yunusinan.vestelremote.ui.theme.DarkBorder
 import com.yunusinan.vestelremote.ui.theme.DarkSurfaceElevated
+import com.yunusinan.vestelremote.ui.theme.VestelDesignTokens
 import com.yunusinan.vestelremote.ui.theme.VestelRed
 
 @Composable
 fun DPadControl(
-    size: Dp = 250.dp,
+    size: Dp = VestelDesignTokens.Dimensions.dpadSize,
     onCommand: (TvCommand) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -39,50 +44,51 @@ fun DPadControl(
             .size(size)
             .clip(CircleShape)
             .background(DarkSurfaceElevated)
-            .padding(8.dp),
+            .border(1.5.dp, DarkBorder, CircleShape)
+            .padding(6.dp),
         contentAlignment = Alignment.Center
     ) {
         // UP Button
         DPadArrowButton(
             icon = Icons.Default.KeyboardArrowUp,
-            contentDescription = "Up",
+            contentDescription = stringResource(R.string.btn_up),
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight(0.33f),
+                .fillMaxWidth(0.52f)
+                .fillMaxHeight(0.32f),
             onClick = { onCommand(TvCommand.DPadUp) }
         )
 
         // DOWN Button
         DPadArrowButton(
             icon = Icons.Default.KeyboardArrowDown,
-            contentDescription = "Down",
+            contentDescription = stringResource(R.string.btn_down),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth(0.5f)
-                .fillMaxHeight(0.33f),
+                .fillMaxWidth(0.52f)
+                .fillMaxHeight(0.32f),
             onClick = { onCommand(TvCommand.DPadDown) }
         )
 
         // LEFT Button
         DPadArrowButton(
             icon = Icons.Default.KeyboardArrowLeft,
-            contentDescription = "Left",
+            contentDescription = stringResource(R.string.btn_left),
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .fillMaxWidth(0.33f)
-                .fillMaxHeight(0.5f),
+                .fillMaxWidth(0.32f)
+                .fillMaxHeight(0.52f),
             onClick = { onCommand(TvCommand.DPadLeft) }
         )
 
         // RIGHT Button
         DPadArrowButton(
             icon = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Right",
+            contentDescription = stringResource(R.string.btn_right),
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .fillMaxWidth(0.33f)
-                .fillMaxHeight(0.5f),
+                .fillMaxWidth(0.32f)
+                .fillMaxHeight(0.52f),
             onClick = { onCommand(TvCommand.DPadRight) }
         )
 
@@ -93,10 +99,15 @@ fun DPadControl(
 
         Box(
             modifier = Modifier
-                .size(size * 0.36f)
+                .size(size * 0.37f)
                 .scale(scale)
                 .clip(CircleShape)
-                .background(if (isPressed) VestelRed.copy(alpha = 0.85f) else Color(0xFF1F1F28))
+                .background(if (isPressed) VestelRed.copy(alpha = 0.85f) else Color(0xFF21212B))
+                .border(
+                    width = 1.dp,
+                    color = if (isPressed) VestelRed else Color.White.copy(alpha = 0.12f),
+                    shape = CircleShape
+                )
                 .clickable(
                     interactionSource = okInteraction,
                     indication = null,
@@ -107,7 +118,8 @@ fun DPadControl(
             Text(
                 text = "OK",
                 color = Color.White,
-                fontSize = 17.sp,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -138,8 +150,8 @@ private fun DPadArrowButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = if (isPressed) VestelRed else Color.White.copy(alpha = 0.85f),
-            modifier = Modifier.size(34.dp)
+            tint = if (isPressed) VestelRed else Color.White.copy(alpha = 0.88f),
+            modifier = Modifier.size(32.dp)
         )
     }
 }

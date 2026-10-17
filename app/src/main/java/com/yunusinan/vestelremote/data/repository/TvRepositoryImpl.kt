@@ -56,13 +56,16 @@ class TvRepositoryImpl(
     private val _volume = MutableStateFlow(20)
     override val volume: StateFlow<Int> = _volume.asStateFlow()
 
+    private val _isVolumeReportedByTv = MutableStateFlow(false)
+    override val isVolumeReportedByTv: StateFlow<Boolean> = _isVolumeReportedByTv.asStateFlow()
+
     private val _isMuted = MutableStateFlow(false)
     override val isMuted: StateFlow<Boolean> = _isMuted.asStateFlow()
 
-    private val _currentApp = MutableStateFlow("Vestel TV")
+    private val _currentApp = MutableStateFlow("Ana Ekran")
     override val currentApp: StateFlow<String> = _currentApp.asStateFlow()
 
-    private val _currentInput = MutableStateFlow("HDMI 1")
+    private val _currentInput = MutableStateFlow("Seçilmedi")
     override val currentInput: StateFlow<String> = _currentInput.asStateFlow()
 
     private val _isMockMode = MutableStateFlow(false)
@@ -70,6 +73,12 @@ class TvRepositoryImpl(
 
     private val _favoriteAppIds = MutableStateFlow<Set<String>>(setOf("youtube", "netflix", "prime_video", "disney_plus"))
     override val favoriteAppIds: StateFlow<Set<String>> = _favoriteAppIds.asStateFlow()
+
+    private val _appCatalog = MutableStateFlow<List<TvApp>>(TvApp.DEFAULT_CATALOG)
+    override val appCatalog: StateFlow<List<TvApp>> = _appCatalog.asStateFlow()
+
+    private val _isAppDiscoveryRunning = MutableStateFlow(false)
+    override val isAppDiscoveryRunning: StateFlow<Boolean> = _isAppDiscoveryRunning.asStateFlow()
 
     private val _language = MutableStateFlow("tr")
     override val language: StateFlow<String> = _language.asStateFlow()
@@ -136,8 +145,11 @@ class TvRepositoryImpl(
                 _activeDevice.value = mock.mockDevice
                 _connectionStatus.value = ConnectionStatus.Connected(mock.mockDevice)
                 _volume.value = mock.volumeLevel
+                _isVolumeReportedByTv.value = true
                 _isMuted.value = mock.isMuted
                 _currentApp.value = mock.currentApp
+                _currentInput.value = mock.currentInput
+                scope.launch { refreshInstalledApps() }
             }
             return
         }
@@ -159,14 +171,19 @@ class TvRepositoryImpl(
                 remotePort = device.port,
                 diagnostics = diag,
                 onVolume = { level, maximum, muted ->
-                    if (maximum > 0) _volume.value = (level * 100 / maximum).coerceIn(0, 100)
+                    if (maximum > 0) {
+                        _volume.value = (level * 100 / maximum).coerceIn(0, 100)
+                        _isVolumeReportedByTv.value = true
+                    }
                     _isMuted.value = muted
                 },
                 onStateChanged = { status -> _connectionStatus.value = status },
                 onEventLog = { t, d -> logEvent(ProtocolEvent.Direction.SYSTEM, t, d) }
             )
             remoteClient = client
-            dialClient = DialClient(device.ipAddress)
+            dialClient = DialClient(device.ipAddress) { t, d ->
+                logEvent(ProtocolEvent.Direction.SYSTEM, t, d)
+            }
 
             val connectResult = client.connect(device)
             if (connectResult.isSuccess) {
@@ -175,6 +192,7 @@ class TvRepositoryImpl(
                 _connectionStatus.compareAndSet(ConnectionStatus.Connected(device), ConnectionStatus.Connected(updated))
                 prefs.saveDevice(updated)
                 logEvent(ProtocolEvent.Direction.INCOMING, "Bağlantı Başarılı", "${device.displayTitle} bağlandı")
+                scope.launch { refreshInstalledApps() }
             } else {
                 val err = safeConnectionError(connectResult.exceptionOrNull() ?: Exception())
                 _connectionStatus.value = ConnectionStatus.Failed(err)
@@ -247,7 +265,9 @@ class TvRepositoryImpl(
         } else {
             remoteClient?.disconnect()
         }
+        _isVolumeReportedByTv.value = false
         _connectionStatus.value = ConnectionStatus.Disconnected
+        _appCatalog.value = TvApp.DEFAULT_CATALOG
         logEvent(ProtocolEvent.Direction.SYSTEM, "Bağlantı Kesildi", "Kullanıcı isteğiyle kapatıldı")
     }
 
@@ -259,6 +279,7 @@ class TvRepositoryImpl(
             if (res.isSuccess) {
                 mockTvClient?.let {
                     _volume.value = it.volumeLevel
+                    _isVolumeReportedByTv.value = true
                     _isMuted.value = it.isMuted
                     _currentApp.value = it.currentApp
                 }
@@ -295,13 +316,16 @@ class TvRepositoryImpl(
         _currentApp.value = app.name
 
         if (_isMockMode.value) {
-            return mockTvClient?.launchApp(app) ?: Result.success(true)
+            val res = mockTvClient?.launchApp(app) ?: Result.success(true)
+            refreshInstalledApps()
+            return res
         }
 
         // Try DIAL first if app has dialName
         if (!app.dialName.isNullOrBlank() && dialClient != null) {
             val dialResult = dialClient!!.launchApp(app.dialName)
             if (dialResult.isSuccess && dialResult.getOrDefault(false)) {
+                scope.launch { refreshInstalledApps() }
                 return Result.success(true)
             }
         }
@@ -315,6 +339,82 @@ class TvRepositoryImpl(
         }
 
         return Result.failure(Exception("Uygulama başlatılamadı"))
+    }
+
+    override suspend fun launchCustomDeepLink(title: String, deepLinkUri: String): Result<Boolean> {
+        val cleanUri = deepLinkUri.trim()
+        if (cleanUri.isBlank()) return Result.failure(IllegalArgumentException("Geçersiz bağlantı adresi"))
+        logEvent(ProtocolEvent.Direction.OUTGOING, "Özel Uygulama Bağlantısı", "$title ($cleanUri)")
+        _currentApp.value = title.ifBlank { cleanUri }
+
+        if (_isMockMode.value) {
+            return Result.success(true)
+        }
+
+        val client = remoteClient
+        if (client != null && client.isConnected) {
+            return client.sendDeepLink(cleanUri).map { true }
+        }
+        return Result.failure(IllegalStateException("Televizyon bağlı değil"))
+    }
+
+    override suspend fun refreshInstalledApps(): Result<Int> {
+        if (_isAppDiscoveryRunning.value) return Result.success(0)
+        _isAppDiscoveryRunning.value = true
+        return try {
+            if (_isMockMode.value) {
+                delay(250)
+                val activeMockApp = mockTvClient?.currentApp ?: ""
+                val mockVerifiedIds = setOf("youtube", "netflix", "prime_video", "disney_plus", "spotify", "tabii")
+                val updated = TvApp.DEFAULT_CATALOG.map { app ->
+                    val state = when {
+                        app.name.equals(activeMockApp, ignoreCase = true) -> AppDiscoveryState.VERIFIED_RUNNING
+                        mockVerifiedIds.contains(app.id) -> AppDiscoveryState.VERIFIED_STOPPED
+                        else -> AppDiscoveryState.UNVERIFIED_SHORTCUT
+                    }
+                    app.copy(discoveryState = state)
+                }
+                _appCatalog.value = updated
+                val count = updated.count { it.isVerifiedOnTv }
+                logEvent(ProtocolEvent.Direction.INCOMING, "DIAL Uygulama Keşfi (Sanal)", "$count uygulama doğrulandı")
+                return Result.success(count)
+            }
+
+            val hostIp = _activeDevice.value?.ipAddress
+            if (hostIp.isNullOrBlank()) {
+                _appCatalog.value = TvApp.DEFAULT_CATALOG
+                return Result.failure(IllegalStateException("Aktif televizyon IP adresi bulunamadı"))
+            }
+
+            val client = dialClient ?: DialClient(hostIp) { t, d ->
+                logEvent(ProtocolEvent.Direction.SYSTEM, t, d)
+            }.also { dialClient = it }
+
+            val results = client.probeCatalogApps(TvApp.DEFAULT_CATALOG)
+            val updated = TvApp.DEFAULT_CATALOG.map { app ->
+                val info = results[app.id]
+                app.copy(discoveryState = info?.state ?: AppDiscoveryState.UNVERIFIED_SHORTCUT)
+            }
+            _appCatalog.value = updated
+
+            // Update active running app name if DIAL reports an app is currently running
+            updated.firstOrNull { it.discoveryState == AppDiscoveryState.VERIFIED_RUNNING }?.let { runningApp ->
+                _currentApp.value = runningApp.name
+            }
+
+            val verifiedCount = updated.count { it.isVerifiedOnTv }
+            logEvent(
+                ProtocolEvent.Direction.INCOMING,
+                "DIAL Uygulama Keşfi",
+                "TV üzerinde $verifiedCount DIAL uygulaması doğrulandı"
+            )
+            Result.success(verifiedCount)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Result.failure(e)
+        } finally {
+            _isAppDiscoveryRunning.value = false
+        }
     }
 
     override suspend fun switchInput(input: TvInput): Result<Boolean> {

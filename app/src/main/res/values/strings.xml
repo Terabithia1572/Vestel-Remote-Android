@@ -24,14 +24,21 @@
     <!-- Home Dashboard -->
     <string name="dashboard_title">Vestel TV Kontrol Paneli</string>
     <string name="quick_actions">Hızlı İşlemler</string>
+    <string name="quick_home">Ana Ekran</string>
+    <string name="quick_back">Geri</string>
+    <string name="quick_assistant">Asistan</string>
+    <string name="quick_wol">WoL Aç</string>
+    <string name="quick_devices">Cihazlar</string>
     <string name="volume">Ses Seviyesi</string>
+    <string name="volume_tv_synced">TV Senkron</string>
+    <string name="volume_step_mode">Adım Kontrolü</string>
     <string name="mute">Sessiz</string>
     <string name="unmute">Sesi Aç</string>
     <string name="power_on">Televizyonu Aç</string>
     <string name="power_off">Kapat / Bekleme</string>
     <string name="wol_wake">Wake-on-LAN ile Aç</string>
-    <string name="current_app">Aktif Uygulama</string>
-    <string name="current_input">Aktif Giriş</string>
+    <string name="current_app">Oturum Durumu</string>
+    <string name="current_input">Son Seçilen Giriş</string>
     <string name="network_ip">IP Adresi</string>
     <string name="network_mac">MAC Adresi</string>
 
@@ -63,8 +70,14 @@
     <string name="touchpad_tap_to_click">Dokunarak Tamam / Seç</string>
 
     <!-- Applications -->
-    <string name="apps_title">Akıllı TV Uygulamaları</string>
-    <string name="apps_subtitle">Vestel Android TV üzerinde başlat</string>
+    <string name="apps_title">TV Uygulamaları</string>
+    <string name="apps_subtitle">DIAL doğrulaması ve hızlı uygulama başlatıcı</string>
+    <string name="apps_verified_section">TV\'de Doğrulanan Uygulamalar (DIAL)</string>
+    <string name="apps_shortcuts_section">Hızlı Başlatma Kısayolları (Deep Link)</string>
+    <string name="apps_probe_button">TV\'yi Sorgula (DIAL)</string>
+    <string name="apps_probing">Sorgulanıyor…</string>
+    <string name="apps_custom_launch">Özel Deep Link</string>
+    <string name="apps_protocol_note">DIAL (Port 8008) protokolü destekleyen uygulamaların TV üzerindeki varlığını ve çalışma durumunu doğrular. Android TV Remote v2 (Port 6466) protokolü ADB olmadan tam paket listesi sunmadığından diğer uygulamalar Deep Link kısayolu olarak başlatılır.</string>
     <string name="app_youtube">YouTube</string>
     <string name="app_netflix">Netflix</string>
     <string name="app_prime">Prime Video</string>
@@ -80,6 +93,7 @@
 
     <!-- HDMI / Inputs -->
     <string name="inputs_title">Giriş Kaynakları</string>
+    <string name="inputs_subtitle">Televizyon giriş menüsünü ve kaynak seçimini yönetin</string>
     <string name="input_hdmi1">HDMI 1</string>
     <string name="input_hdmi2">HDMI 2 (eARC)</string>
     <string name="input_hdmi3">HDMI 3</string>
@@ -88,10 +102,11 @@
 
     <!-- Devices Management & Pairing -->
     <string name="devices_title">Cihaz Yönetimi</string>
+    <string name="devices_subtitle">Yerel ağdaki Android TV cihazlarını keşfedin, eşleştirin ve yönetin</string>
     <string name="discovered_devices">Ağdaki Televizyonlar</string>
     <string name="saved_devices">Kayıtlı Cihazlar</string>
     <string name="scan_network">Ağda Ara (mDNS / SSDP)</string>
-    <string name="scanning">Taranıyor…</string>
+    <string name="scanning">Ağ Taranıyor…</string>
     <string name="manual_connect">Manuel IP ile Bağlan</string>
     <string name="ip_hint">Örn: 192.168.1.150</string>
     <string name="mac_hint">Örn: AA:BB:CC:DD:EE:FF (WoL için)</string>
@@ -109,6 +124,7 @@
 
     <!-- Settings & About -->
     <string name="settings_title">Ayarlar</string>
+    <string name="settings_subtitle">Uygulama görünümü, geri bildirim ve protokol teşhis seçenekleri</string>
     <string name="setting_language">Dil / Language</string>
     <string name="lang_tr">Türkçe (Varsayılan)</string>
     <string name="lang_en">English</string>
@@ -124,10 +140,10 @@
 
     <!-- About Yunus İNAN & Project -->
     <string name="about_title">Hakkında</string>
-    <string name="app_version_label">Sürüm: 1.0.0 (Vestel 55QG9960 Uyumlu)</string>
+    <string name="app_version_label">Sürüm: 1.0.0 (Vestel 55QG9960 &amp; GoogleTV7288 Doğrulandı)</string>
     <string name="developer_name">Geliştirici: Yunus İNAN</string>
     <string name="developer_github">GitHub: https://github.com/Terabithia1572</string>
-    <string name="developer_attribution">Geliştirme ve Android TV uyarlaması: Yunus İNAN</string>
+    <string name="developer_attribution">Android uygulaması geliştirme ve Vestel Android TV uyarlaması: Yunus İNAN</string>
     <string name="original_project_credit">Orijinal referans mimarisi: Gabriel Greco (LGwebOS-menubar)</string>
     <string name="rea_credit">Tersine mühendislik araştırma altyapısı: REA Framework</string>
     <string name="disclaimer">Bu uygulama Vestel Elektronik Sanayi ve Ticaret A.Ş. tarafından resmi olarak desteklenmemekte veya onaylanmamaktadır. Android TV ve Google TV, Google LLC\'nin tescilli ticari markalarıdır. Proje MIT Lisansı ile açık kaynak olarak sunulmuştur.</string>

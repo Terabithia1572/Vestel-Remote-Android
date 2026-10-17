@@ -2,6 +2,7 @@ package com.yunusinan.vestelremote.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -16,12 +17,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.yunusinan.vestelremote.R
 import com.yunusinan.vestelremote.ui.theme.DarkBorder
 import com.yunusinan.vestelremote.ui.theme.DarkSurfaceElevated
 import com.yunusinan.vestelremote.ui.theme.DarkTextMuted
+import com.yunusinan.vestelremote.ui.theme.VestelDesignTokens
 import com.yunusinan.vestelremote.ui.theme.VestelRed
 
 @Composable
@@ -34,12 +37,19 @@ fun TouchpadControl(
     var accumulatedDx by remember { mutableFloatStateOf(0f) }
     var accumulatedDy by remember { mutableFloatStateOf(0f) }
 
+    val shape = RoundedCornerShape(22.dp)
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .height(VestelDesignTokens.Dimensions.touchpadHeight)
+            .clip(shape)
             .background(DarkSurfaceElevated)
+            .border(
+                width = 1.dp,
+                color = if (touchPos != null) VestelRed.copy(alpha = 0.45f) else DarkBorder,
+                shape = shape
+            )
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
@@ -66,7 +76,6 @@ fun TouchpadControl(
                         accumulatedDx += dragAmount.x
                         accumulatedDy += dragAmount.y
 
-                        // Trigger step when threshold reached
                         val threshold = 32f
                         if (kotlin.math.abs(accumulatedDx) >= threshold || kotlin.math.abs(accumulatedDy) >= threshold) {
                             onSwipeDelta(accumulatedDx, accumulatedDy)
@@ -79,49 +88,62 @@ fun TouchpadControl(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            // Draw subtle corner accents
             val strokeWidth = 1.5.dp.toPx()
-            val cornerLen = 20.dp.toPx()
-            val color = Color.White.copy(alpha = 0.08f)
+            val inset = 16.dp.toPx()
+            val cornerLen = 18.dp.toPx()
+            val accentColor = Color.White.copy(alpha = 0.14f)
 
-            // Top-left
-            drawLine(color, Offset(16.dp.toPx(), 16.dp.toPx()), Offset(16.dp.toPx() + cornerLen, 16.dp.toPx()), strokeWidth)
-            drawLine(color, Offset(16.dp.toPx(), 16.dp.toPx()), Offset(16.dp.toPx(), 16.dp.toPx() + cornerLen), strokeWidth)
+            // Top-left corner accent
+            drawLine(accentColor, Offset(inset, inset), Offset(inset + cornerLen, inset), strokeWidth)
+            drawLine(accentColor, Offset(inset, inset), Offset(inset, inset + cornerLen), strokeWidth)
 
-            // Top-right
-            drawLine(color, Offset(size.width - 16.dp.toPx(), 16.dp.toPx()), Offset(size.width - 16.dp.toPx() - cornerLen, 16.dp.toPx()), strokeWidth)
-            drawLine(color, Offset(size.width - 16.dp.toPx(), 16.dp.toPx()), Offset(size.width - 16.dp.toPx(), 16.dp.toPx() + cornerLen), strokeWidth)
+            // Top-right corner accent
+            drawLine(accentColor, Offset(size.width - inset, inset), Offset(size.width - inset - cornerLen, inset), strokeWidth)
+            drawLine(accentColor, Offset(size.width - inset, inset), Offset(size.width - inset, inset + cornerLen), strokeWidth)
 
-            // Draw finger follower dot if active
+            // Bottom-left corner accent
+            drawLine(accentColor, Offset(inset, size.height - inset), Offset(inset + cornerLen, size.height - inset), strokeWidth)
+            drawLine(accentColor, Offset(inset, size.height - inset), Offset(inset, size.height - inset - cornerLen), strokeWidth)
+
+            // Bottom-right corner accent
+            drawLine(accentColor, Offset(size.width - inset, size.height - inset), Offset(size.width - inset - cornerLen, size.height - inset), strokeWidth)
+            drawLine(accentColor, Offset(size.width - inset, size.height - inset), Offset(size.width - inset, size.height - inset - cornerLen), strokeWidth)
+
+            // Draw finger follower ripple if active
             touchPos?.let { pos ->
                 drawCircle(
-                    color = VestelRed.copy(alpha = 0.25f),
+                    color = VestelRed.copy(alpha = 0.22f),
                     radius = 28.dp.toPx(),
                     center = pos
                 )
                 drawCircle(
                     color = VestelRed,
-                    radius = 8.dp.toPx(),
+                    radius = 7.dp.toPx(),
                     center = pos
                 )
             }
         }
 
         Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = stringResource(R.string.touchpad_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White.copy(alpha = 0.85f)
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White.copy(alpha = 0.88f),
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = stringResource(R.string.touchpad_hint),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = DarkTextMuted,
-                fontSize = 12.sp
+                textAlign = TextAlign.Center
             )
         }
     }

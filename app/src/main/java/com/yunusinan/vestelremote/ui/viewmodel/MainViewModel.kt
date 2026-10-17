@@ -11,25 +11,29 @@ import androidx.lifecycle.viewModelScope
 import com.yunusinan.vestelremote.data.repository.TvRepository
 import com.yunusinan.vestelremote.domain.model.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class MainUiState(
     val activeDevice: TvDevice? = null,
     val connectionStatus: ConnectionStatus = ConnectionStatus.Disconnected,
     val volume: Int = 20,
+    val isVolumeReportedByTv: Boolean = false,
+    val isUserDraggingVolume: Boolean = false,
     val isMuted: Boolean = false,
-    val currentApp: String = "Vestel TV",
-    val currentInput: String = "HDMI 1",
+    val currentApp: String = "Ana Ekran",
+    val currentInput: String = "Seçilmedi",
     val discoveredDevices: List<TvDevice> = emptyList(),
     val savedDevices: List<TvDevice> = emptyList(),
     val protocolEvents: List<ProtocolEvent> = emptyList(),
     val connectionDiagnostics: List<ConnectionDiagnostic> = emptyList(),
     val favoriteAppIds: Set<String> = setOf("youtube", "netflix", "prime_video", "disney_plus"),
+    val appCatalog: List<TvApp> = TvApp.DEFAULT_CATALOG,
+    val isAppDiscoveryRunning: Boolean = false,
     val language: String = "tr",
     val theme: String = "dark",
     val hapticsEnabled: Boolean = true,
@@ -50,6 +54,15 @@ class MainViewModel(
     private var currentPinDeferred: CompletableDeferred<String>? = null
     private var connectionJob: Job? = null
 
+    val volumeController = VolumeSliderController(
+        scope = viewModelScope,
+        stepIntervalMs = 140L,
+        maxStepsPerGesture = 15,
+        sendVolumeCommand = { cmd ->
+            repository.sendCommand(cmd)
+        }
+    )
+
     private fun startConnection(block: suspend () -> Unit) {
         if (connectionJob?.isActive == true) return
         connectionJob = viewModelScope.launch { block() }
@@ -64,7 +77,17 @@ class MainViewModel(
     }
 
     init {
-        // Collect reactive repository state
+        viewModelScope.launch {
+            volumeController.state.collect { volState ->
+                _uiState.update {
+                    it.copy(
+                        volume = volState.displayVolume,
+                        isVolumeReportedByTv = volState.isVolumeReportedByTv,
+                        isUserDraggingVolume = volState.isUserDragging
+                    )
+                }
+            }
+        }
         viewModelScope.launch {
             repository.activeDevice.collect { dev ->
                 _uiState.update { it.copy(activeDevice = dev) }
@@ -72,6 +95,9 @@ class MainViewModel(
         }
         viewModelScope.launch {
             repository.connectionStatus.collect { status ->
+                if (!status.isConnected) {
+                    volumeController.onConnectionReset()
+                }
                 _uiState.update {
                     it.copy(
                         connectionStatus = status,
@@ -91,8 +117,10 @@ class MainViewModel(
             }
         }
         viewModelScope.launch {
-            repository.volume.collect { vol ->
-                _uiState.update { it.copy(volume = vol) }
+            combine(repository.volume, repository.isVolumeReportedByTv) { vol, reported ->
+                vol to reported
+            }.collect { (vol, reported) ->
+                volumeController.onTvVolumeUpdated(vol, isFromRealTvOrMock = reported)
             }
         }
         viewModelScope.launch {
@@ -128,6 +156,16 @@ class MainViewModel(
         viewModelScope.launch {
             repository.favoriteAppIds.collect { favs ->
                 _uiState.update { it.copy(favoriteAppIds = favs) }
+            }
+        }
+        viewModelScope.launch {
+            repository.appCatalog.collect { apps ->
+                _uiState.update { it.copy(appCatalog = apps) }
+            }
+        }
+        viewModelScope.launch {
+            repository.isAppDiscoveryRunning.collect { discovering ->
+                _uiState.update { it.copy(isAppDiscoveryRunning = discovering) }
             }
         }
         viewModelScope.launch {
@@ -167,10 +205,16 @@ class MainViewModel(
     fun onTabSelected(tabIndex: Int) {
         triggerHaptic()
         _uiState.update { it.copy(selectedTab = tabIndex) }
+        if (tabIndex == 2 && _uiState.value.connectionStatus.isConnected) {
+            onRefreshInstalledApps()
+        }
     }
 
     fun onCommand(command: TvCommand) {
         triggerHaptic()
+        if (command is TvCommand.VolumeUp || command is TvCommand.VolumeDown) {
+            volumeController.cancelPendingCommands()
+        }
         viewModelScope.launch {
             repository.sendCommand(command)
         }
@@ -183,13 +227,11 @@ class MainViewModel(
     }
 
     fun onVolumeChange(newVolume: Int) {
-        val current = _uiState.value.volume
-        val diff = newVolume - current
-        if (diff > 0) {
-            onCommand(TvCommand.VolumeUp)
-        } else if (diff < 0) {
-            onCommand(TvCommand.VolumeDown)
-        }
+        volumeController.onSliderValueChanged(newVolume)
+    }
+
+    fun onVolumeChangeFinished() {
+        volumeController.onSliderInteractionFinished()
     }
 
     fun onScanClick() {
@@ -202,11 +244,15 @@ class MainViewModel(
     fun onConnectDevice(device: TvDevice) {
         triggerHaptic()
         val known = _uiState.value.savedDevices.firstOrNull { it.ipAddress == device.ipAddress }
-        if (! _uiState.value.isMockMode && device.serverFingerprint == null && known?.serverFingerprint == null) {
+        if (!_uiState.value.isMockMode && device.serverFingerprint == null && known?.serverFingerprint == null) {
             onPairDevice(device)
         } else startConnection {
-            repository.connect(device.copy(serverFingerprint = device.serverFingerprint ?: known?.serverFingerprint,
-                macAddress = device.macAddress ?: known?.macAddress))
+            repository.connect(
+                device.copy(
+                    serverFingerprint = device.serverFingerprint ?: known?.serverFingerprint,
+                    macAddress = device.macAddress ?: known?.macAddress
+                )
+            )
         }
     }
 
@@ -215,7 +261,6 @@ class MainViewModel(
         startConnection {
             repository.pair(device) {
                 withContext(Dispatchers.Main.immediate) {
-                    // Reached only after ConfigurationAck. Display on the real TV still requires observation.
                     val deferred = CompletableDeferred<String>()
                     currentPinDeferred = deferred
                     _uiState.update { it.copy(pairingPromptDevice = device) }
@@ -281,6 +326,19 @@ class MainViewModel(
         triggerHaptic()
         viewModelScope.launch {
             repository.launchApp(app)
+        }
+    }
+
+    fun onLaunchCustomDeepLink(title: String, deepLinkUri: String) {
+        triggerHaptic()
+        viewModelScope.launch {
+            repository.launchCustomDeepLink(title, deepLinkUri)
+        }
+    }
+
+    fun onRefreshInstalledApps() {
+        viewModelScope.launch {
+            repository.refreshInstalledApps()
         }
     }
 

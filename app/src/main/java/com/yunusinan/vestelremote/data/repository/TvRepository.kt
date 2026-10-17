@@ -11,11 +11,14 @@ interface TvRepository {
     val protocolEvents: StateFlow<List<ProtocolEvent>>
     val connectionDiagnostics: StateFlow<List<ConnectionDiagnostic>>
     val volume: StateFlow<Int>
+    val isVolumeReportedByTv: StateFlow<Boolean>
     val isMuted: StateFlow<Boolean>
     val currentApp: StateFlow<String>
     val currentInput: StateFlow<String>
     val isMockMode: StateFlow<Boolean>
     val favoriteAppIds: StateFlow<Set<String>>
+    val appCatalog: StateFlow<List<TvApp>>
+    val isAppDiscoveryRunning: StateFlow<Boolean>
     val language: StateFlow<String>
     val theme: StateFlow<String>
     val hapticsEnabled: StateFlow<Boolean>
@@ -27,6 +30,8 @@ interface TvRepository {
     suspend fun sendCommand(command: TvCommand): Result<Unit>
     suspend fun sendTouchpadDelta(dx: Float, dy: Float)
     suspend fun launchApp(app: TvApp): Result<Boolean>
+    suspend fun launchCustomDeepLink(title: String, deepLinkUri: String): Result<Boolean>
+    suspend fun refreshInstalledApps(): Result<Int>
     suspend fun switchInput(input: TvInput): Result<Boolean>
     suspend fun wakeOnLan(macAddress: String, ipAddress: String?): Result<Unit>
     suspend fun runDiagnostics(ip: String): TvDiagnostics

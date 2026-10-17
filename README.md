@@ -323,7 +323,7 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## 13. Test Süreçleri
 
-Proje; Protobuf çerçeveleme, SHA-256 PIN kriptografisi, eşleştirme durum makinesi, gerçek loopback mTLS soket oturumu, eksik/bozuk paket reddi ve gizlilik sızıntısı kontrollerini kapsayan **33 adet birim ve regresyon testi** içerir.
+Proje; Protobuf çerçeveleme, SHA-256 PIN kriptografisi, eşleştirme durum makinesi, gerçek loopback mTLS soket oturumu, ses kaydırıcısı hız sınırlama/iptal mantığı, DIAL XML ayrıştırma ve gizlilik sızıntısı kontrollerini kapsayan **37 adet birim ve regresyon testi** içerir.
 
 Testleri çalıştırmak için:
 
@@ -331,25 +331,28 @@ Testleri çalıştırmak için:
 .\gradlew.bat testDebugUnitTest
 ```
 
-Test sınıfları (`app/src/test/java/com/yunusinan/vestelremote/protocol/`):
-- `ProtoUtilsTest` — Varint ve çerçeve bütünlüğü testleri
-- `PairingCryptoTest` — RSA modül/üs ve PIN SHA-256 secret vektör testleri
-- `PairingStateMachineTest` — Eşleştirme ACK ve hata durumu geçiş testleri
-- `ReferenceProtocolTest` — Resmi Android TV Remote v2 protokol mesaj şeması uyumluluk testleri
-- `RemoteSessionRegressionTest` — Loopback mTLS, sertifika sabitleme, `RemoteStart`, ping/volume ve iptal testleri
-- `TvCommandEncodingTest` — Android `KeyEvent` tuş kodu doğrulama testleri
-- `MockTvClientTest` — Sanal TV durum makinesi testleri
+Test sınıfları (`app/src/test/java/com/yunusinan/vestelremote/`):
+- `VolumeAndAppDiscoveryTest` — Ses kaydırıcısı kare birleştirme, bırakma/yön değişimi anında iptal ve DIAL XML ayrıştırma testleri
+- `protocol/ProtoUtilsTest` — Varint ve çerçeve bütünlüğü testleri
+- `protocol/PairingCryptoTest` — RSA modül/üs ve PIN SHA-256 secret vektör testleri
+- `protocol/PairingStateMachineTest` — Eşleştirme ACK ve hata durumu geçiş testleri
+- `protocol/ReferenceProtocolTest` — Resmi Android TV Remote v2 protokol mesaj şeması uyumluluk testleri
+- `protocol/RemoteSessionRegressionTest` — Loopback mTLS, sertifika sabitleme, `RemoteStart`, ping/volume ve iptal testleri
+- `protocol/TvCommandEncodingTest` — Android `KeyEvent` tuş kodu doğrulama testleri
+- `protocol/MockTvClientTest` — Sanal TV durum makinesi testleri
 
 ---
 
-## 14. Bilinen Sorunlar (Known Issues)
+## 14. Son Güncellemeler ve Protokol Notları
 
-Gerçek donanım doğrulaması (**Samsung Galaxy S24 Ultra** ↔ **Vestel 55QG9960 `GoogleTV7288`**) sonucunda temel keşif, eşleştirme, bağlantı ve kumanda işlevlerinin kararlı çalıştığı onaylanmıştır. Bir sonraki geliştirme fazında ele alınmak üzere kayıt altına alınan mevcut bilinen sorunlar şunlardır:
+Gerçek donanım doğrulaması (**Samsung Galaxy S24 Ultra** ↔ **Vestel 55QG9960 `GoogleTV7288`**) sonrasında aşağıdaki iyileştirmeler tamamlanmıştır:
 
-1. **Panel (Dashboard) Ses Kaydırıcısı Kararsızlığı:**
-   - Ana Kontrol Paneli (`Panel`) ekranındaki ses kaydırıcısı (volume slider) kararsız davranabilmektedir. Kullanıcı parmağını kaydırıcıdan çektiğinde ses komutları gönderilmeye devam edebilmekte ve sesi istenen seviyede durdurmak zorlaşabilmektedir. *(Geçiçi çözüm olarak Kumanda ekranındaki dikey `VOL + / -` mandal tuşları kararlı şekilde kullanılabilir.)*
-2. **Uygulamalar (Apps) Ekranında Kurulu Uygulamaların Dinamik Listelenmesi:**
-   - `Uygulamalar` ekranı şu anda önceden tanımlı popüler akıllı TV uygulamalarını göstermektedir. Desteklenen protokolün izin verdiği ölçüde televizyonda fiilen kurulu olan uygulamaların dinamik olarak keşfedilip listelenmesi bir sonraki aşamada eklenecektir.
+1. **Kararlı Ses Kaydırıcısı (`VolumeSliderController`):**
+   - Android TV Remote v2 protokolü yalnızca artımlı `VOLUME_UP` / `VOLUME_DOWN` komutlarını desteklediğinden, `Panel` ekranındaki ses kaydırıcısına kare birleştirme (coalescing), `140ms` hız sınırı, parmak çekildiğinde (`onValueChangeFinished`) veya yön değiştirildiğinde bekleyen komutları anında iptal etme mekanizması ve hassas `-` / `+` adım tuşları eklenmiştir.
+2. **DIAL Uygulama Doğrulaması ve Özel Deep Link Başlatıcı:**
+   - `Uygulamalar` ekranı, DIAL (`Port 8008`) protokolünü destekleyen uygulamaların TV üzerindeki varlığını ve çalışma durumunu (`running` / `stopped`) doğrular. Android TV Remote v2 (`Port 6466`) protokolü ADB olmadan tam paket listesi sunmadığından, DIAL dışı uygulamalar şeffaf biçimde **Hızlı Başlatma Kısayolları (Deep Link)** altında ayrıştırılmış ve herhangi bir paket/URI bağlantısını açabilen **Özel Deep Link** başlatıcısı eklenmiştir.
+3. **Uyarlanabilir 6 Sekmeli Alt Gezinme Çubuğu (`VestelBottomNavigationBar`):**
+   - Tüm 6 sekme (`Panel`, `Kumanda`, `Uygulamalar`, `Girişler`, `Cihazlar`, `Ayarlar`) tek satır etiket garantisi ve sistem hareket çubuğu (gesture inset) uyumuyla yeniden tasarlanmıştır.
 
 ---
 

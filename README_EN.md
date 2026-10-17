@@ -323,7 +323,7 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## 13. Testing
 
-The repository includes **33 unit and regression tests** covering Protobuf framing, SHA-256 PIN cryptography, pairing state machine validation, real loopback mTLS socket sessions, truncated/malformed frame rejection, and secret-redaction checks.
+The repository includes **37 unit and regression tests** covering Protobuf framing, SHA-256 PIN cryptography, pairing state machine validation, real loopback mTLS socket sessions, volume slider coalescing/cancellation, DIAL XML parsing, and secret-redaction checks.
 
 Run the test suite with:
 
@@ -331,25 +331,28 @@ Run the test suite with:
 .\gradlew.bat testDebugUnitTest
 ```
 
-Test suites (`app/src/test/java/com/yunusinan/vestelremote/protocol/`):
-- `ProtoUtilsTest` — Varint and frame boundary tests
-- `PairingCryptoTest` — RSA modulus/exponent & PIN SHA-256 secret vector tests
-- `PairingStateMachineTest` — Pairing ACK and error state transition tests
-- `ReferenceProtocolTest` — Official Android TV Remote v2 wire schema compatibility tests
-- `RemoteSessionRegressionTest` — Loopback mTLS, certificate pinning, `RemoteStart`, ping/volume, and cancellation tests
-- `TvCommandEncodingTest` — Android `KeyEvent` keycode verification tests
-- `MockTvClientTest` — Virtual TV state machine tests
+Test suites (`app/src/test/java/com/yunusinan/vestelremote/`):
+- `VolumeAndAppDiscoveryTest` — Volume slider frame coalescing, immediate cancellation on release/direction reversal, and DIAL XML parsing tests
+- `protocol/ProtoUtilsTest` — Varint and frame boundary tests
+- `protocol/PairingCryptoTest` — RSA modulus/exponent & PIN SHA-256 secret vector tests
+- `protocol/PairingStateMachineTest` — Pairing ACK and error state transition tests
+- `protocol/ReferenceProtocolTest` — Official Android TV Remote v2 wire schema compatibility tests
+- `protocol/RemoteSessionRegressionTest` — Loopback mTLS, certificate pinning, `RemoteStart`, ping/volume, and cancellation tests
+- `protocol/TvCommandEncodingTest` — Android `KeyEvent` keycode verification tests
+- `protocol/MockTvClientTest` — Virtual TV state machine tests
 
 ---
 
-## 14. Known Issues
+## 14. Recent Refinements & Protocol Notes
 
-Following real-device verification (**Samsung Galaxy S24 Ultra** ↔ **Vestel 55QG9960 `GoogleTV7288`**), core discovery, pairing, authenticated connection, and remote navigation are confirmed working. The following known issues are scheduled for the next development phase:
+Following real-device verification (**Samsung Galaxy S24 Ultra** ↔ **Vestel 55QG9960 `GoogleTV7288`**), the following refinements have been implemented:
 
-1. **Dashboard Volume Slider Instability:**
-   - The volume slider on the Home Dashboard behaves unstably. Volume commands may continue after the user releases the slider, making it difficult to stop the volume at the desired level. *(Workaround: Use the vertical `VOL + / -` rocker buttons on the Remote screen, which work reliably.)*
-2. **Dynamic Installed-App Discovery on the Apps Screen:**
-   - The `Apps` screen currently displays a curated catalog of streaming services. Dynamic discovery and listing of applications actually installed on the television (where permitted by the supported protocol) is planned for the next development phase.
+1. **Stabilized Volume Slider (`VolumeSliderController`):**
+   - Because Android TV Remote v2 only supports incremental `VOLUME_UP` / `VOLUME_DOWN` key events, the Dashboard volume slider now coalesces drag frames, enforces a `140ms` step interval, immediately cancels pending steps on finger release (`onValueChangeFinished`) or direction reversal, and includes dedicated `-` / `+` step buttons.
+2. **DIAL Application Verification & Custom Deep Link Launcher:**
+   - The `Apps` screen probes DIAL (`Port 8008`) endpoints to verify installed/running DIAL applications on the TV. Because Android TV Remote v2 (`Port 6466`) does not expose full package enumeration without ADB, non-DIAL apps are transparently separated under **Quick Launch Shortcuts (Deep Link)** alongside a **Custom Deep Link** launcher (`Field 90`).
+3. **Adaptive 6-Tab Bottom Navigation (`VestelBottomNavigationBar`):**
+   - All 6 destinations (`Dashboard`, `Remote`, `Apps`, `Inputs`, `Devices`, `Settings`) render single-line labels with consistent icon alignment and gesture navigation inset handling.
 
 ---
 
