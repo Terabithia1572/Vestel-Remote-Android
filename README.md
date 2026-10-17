@@ -9,7 +9,7 @@
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20%7C%20Material%203-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![Target Phone](https://img.shields.io/badge/Doğrulanan%20Telefon-Samsung%20Galaxy%20S24%20Ultra-1428A0?logo=samsung&logoColor=white)](#4-desteklenen-ve-doğrulanan-donanım)
 [![Target TV](https://img.shields.io/badge/Doğrulanan%20TV-Vestel%2055QG9960%20(GoogleTV7288)-E30613)](#4-desteklenen-ve-doğrulanan-donanım)
-[![Release](https://img.shields.io/badge/Sürüm-v1.0.0--beta.2-orange)](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)
+[![Release](https://img.shields.io/badge/Sürüm-v1.0.0--beta.3-orange)](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)
 [![License: MIT](https://img.shields.io/badge/Lisans-MIT-green.svg)](LICENSE)
 
 **Android uygulaması geliştirme ve Vestel Android TV uyarlaması: [Yunus İNAN](https://github.com/Terabithia1572)**  
@@ -97,9 +97,9 @@ Uygulama, **Samsung Galaxy S24 Ultra** üzerinde gerçek **Vestel 55QG9960 (`Goo
 - **📌 Sunucu Sertifikası Sabitleme (Certificate Pinning):** Eşleştirme sırasında alınan TV X.509 sertifikasının SHA-256 parmak izini kaydeder ve Port `6466` üzerindeki kumanda oturumlarında doğrular.
 - **🏠 Ana Kontrol Paneli (`Panel`):** Bağlı televizyonun adını (`GoogleTV7288`), modelini (`Vestel 55QG9960`), güç düğmesini, kararlı ses kaydırıcısını (`-` / `+` ve `Sessiz`), 4'lü hızlı işlem ızgarasını (`Ana Sayfa`, `Geri`, `Asistan`, `TV Uyandır`), aktif giriş kartını ve zaman damgalı **Protokol Olay Günlüğü** akışını gösterir.
 - **🎮 Ergonomik Uzaktan Kumanda (`Kumanda`):** Dairesel D-Pad, dikey ses/kanal mandalları, medya kontrol satırı ve dokunmatik yüzey, renk tuşları ile `0–9` numara takımını barındıran açılır `...` çekmecesi.
-- **🚀 Hibrit Uygulama Başlatıcı (`Uygulamalar`):** DIAL (`Port 8008`) durum doğrulaması (`Açık` / `Kurulu`), Hızlı Başlatma Kısayolları (Deep Link) ızgarası ve özel URI/paket başlatıcısı.
+- **🚀 Hibrit Uygulama Başlatıcı (`Uygulamalar`):** DIAL (`Port 8008`) durum doğrulaması (`Açık` / `Kurulu`), özel **TVX (`com.tvx.tv`)** ve **RecTV (`com.rectv.shot`)** katalog entegrasyonu, `AppLauncherEngine` ile kanıt düzeyli Deep Link başlatma, arama/filtreleme, favoriler ve uygulama başlatma teşhisi.
 - **🔌 Giriş Kaynakları (`Girişler`):** Aktif kaynak rozetli 2 sütunlu HDMI / Canlı TV / AV seçim kartları.
-- **🩺 Bağlantı Teşhis Aracı ve Gruplanmış Ayarlar (`Ayarlar`):** Kişisel veri sızdırmadan bağlantı aşamalarını panoya kopyalama (`Teşhis Kopyala`), Cihaz Yönetimi erişimi, dil/tema/titreşim tercihleri ve tek dokunuşla bağlantıyı kesme.
+- **🩺 Bağlantı ve Uygulama Başlatma Teşhisi (`Ayarlar`):** Kişisel veri sızdırmadan bağlantı ve uygulama başlatma aşamalarını panoya kopyalama (`Tanılama Bilgilerini Kopyala`), Cihaz Yönetimi erişimi, dil/tema/titreşim tercihleri ve tek dokunuşla bağlantıyı kesme.
 
 ---
 
@@ -160,7 +160,7 @@ Aşağıdaki tüm ekran görüntüleri, **Vestel 55QG9960 (`GoogleTV7288`)** tel
 
 ## 4. Desteklenen ve Doğrulanan Donanım
 
-Bu sürüm (`v1.0.0-beta.2`), gerçek fiziksel donanımlar üzerinde uçtan uca test edilmiş ve doğrulanmıştır:
+Bu sürüm (`v1.0.0-beta.3`), gerçek fiziksel donanımlar üzerinde uçtan uca test edilmiş ve doğrulanmıştır:
 
 | Bileşen | Doğrulanan Cihaz / Model | Durum |
 | :--- | :--- | :--- |
@@ -168,14 +168,16 @@ Bu sürüm (`v1.0.0-beta.2`), gerçek fiziksel donanımlar üzerinde uçtan uca 
 | **Televizyon** | **Vestel 55QG9960 4K QLED Android TV** (Ağ adı: `GoogleTV7288`) | ✅ Doğrulandı |
 | **Uyumlu Diğer Cihazlar** | `Android TV Remote Service v2` (`_androidtvremote2._tcp`) barındıran tüm Android TV / Google TV modelleri | ✅ Uyumlu |
 | **Cihaz Keşfi & Eşleştirme** | Yerel Wi-Fi mDNS / SSDP keşfi ve Port `6467` mTLS 6 haneli PIN eşleştirmesi | ✅ Doğrulandı |
-| **Canlı Kumanda & Ses / HDMI** | Port `6466` oturumu, D-Pad, kararlı ses kontrolü, HDMI geçişleri ve uygulama başlatma | ✅ Doğrulandı |
+| **Canlı Kumanda & Ses / HDMI** | Port `6466` oturumu, D-Pad, kararlı ses kontrolü ve HDMI geçişleri | ✅ Doğrulandı |
+| **TVX Uzaktan Başlatma (`com.tvx.tv`)** | Android TV Remote v2 `RemoteAppLinkLaunchRequest` (`tvx://`) ile fiziksel TV'de doğrudan açılış | ✅ Doğrulandı |
+| **RecTV Katalog Entegrasyonu (`com.rectv.shot`)** | Uygulama kataloğuna eklendi; doğrudan başlatma desteklenmiyor (TV Ana Ekranı `HOME` yönlendirmesi) | ℹ️ Katalog + Yönlendirme |
 
 ---
 
 ## 5. Kurulum
 
 ### Yöntem 1: GitHub Releases Üzerinden Hazır APK Kurulumu
-1. Bu deponun **[Releases](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)** sayfasından en güncel `app-debug.apk` dosyasını telefonunuza indirin.
+1. Bu deponun **[Releases](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)** sayfasından en güncel `Vestel-Remote-v1.0.0-beta.3-debug.apk` dosyasını telefonunuza indirin.
 2. Android telefonunuzda indirilen APK dosyasına dokunun ve gerekirse **"Bilinmeyen uygulamaları yükle"** iznini onaylayın.
 
 ### Yöntem 2: ADB (Android Debug Bridge) ile Kurulum
@@ -214,15 +216,29 @@ adb install -r app\build\outputs\apk\debug\app-debug.apk
 
 ## 8. Uygulama Başlatıcı ve DIAL Keşfi
 
-**Uygulamalar** ekranı, Android TV protokollerinin yeteneklerini şeffaf biçimde birleştirir:
+**Uygulamalar** ekranı, Android TV protokollerinin yeteneklerini şeffaf biçimde birleştirir ve kurulum keşfi ile uzaktan başlatma kanıt düzeylerini açıkça ayırır:
 
 1. **TV'de Doğrulanan Uygulamalar (DIAL — Port `8008`):**
    - Televizyonun yerel DIAL REST sunucusunu (`http://<TV_IP>:8008/apps/<AppName>`) sorgulayarak **YouTube** ve **Netflix** gibi DIAL destekli uygulamaların televizyonda kurulu olup olmadığını ve anlık çalışma durumunu (`Açık` / `Kurulu`) doğrular.
    > **Protokol Notu:** Standart Android TV Remote v2 (`Port 6466`) ve DIAL (`Port 8008`) protokolleri, televizyonda ADB (Android Debug Bridge) geliştirici modu açılmadığı sürece işletim sistemindeki tüm yüklü APK paketlerinin tam listesini dışarıya vermez.
-2. **Hızlı Başlatma Kısayolları (Deep Link — Port `6466`):**
-   - **YouTube, Netflix, Prime Video, Disney+, Spotify, Exxen, BluTV, Gain, TOD ve Twitch** için 2 sütunlu hızlı başlatma kartları, yıldız (`★`) ile favorilere sabitleme ve anlık arama filtresi sunar. Uygulamalar öncelikle Android TV Remote v2 `RemoteAppLinkLaunchRequest` (Field `90`) üzerinden, gerekirse DIAL üzerinden başlatılır.
-3. **Özel Deep Link / Paket Başlatıcı:**
-   - Ekranın altındaki **Özel Deep Link** alanı ile herhangi bir `https://...`, `vnd.youtube://...` veya özel uygulama bağlantısını doğrudan televizyona gönderebilirsiniz.
+2. **Özel Android TV Uygulamaları (TVX & RecTV Entegrasyonu):**
+   - Kullanıcı tarafından televizyonda kurulu olduğu onaylanan uygulamalar DIAL doğrulaması taklit edilmeden **`TV'de Yüklü (Kullanıcı Onaylı)`** olarak işaretlenir ve kendi özel Jetpack Compose vektör ikonlarıyla 3 sütunlu uygulama ızgarasında yer alır:
+   - **TVX (`com.tvx.tv`):**
+     - **Görünen Ad:** `TVX`
+     - **Paket Adı:** `com.tvx.tv`
+     - **Deep Link:** `tvx://` (`com.tvx.tv.MainActivity` üzerinde `ACTION_VIEW` + `CATEGORY_BROWSABLE` olarak doğrulanmıştır)
+     - **Başlatma Yöntemi:** Android TV Remote v2 `RemoteAppLinkLaunchRequest` (Protobuf Alan `90`)
+     - **Durum:** ✅ **Fiziksel Vestel 55QG9960 (`GoogleTV7288`) televizyonda test edildi ve doğrudan açıldığı doğrulandı.**
+   - **RecTV (`com.rectv.shot`):**
+     - **Görünen Ad:** `RecTV`
+     - **Paket Adı:** `com.rectv.shot`
+     - **Durum:** Uygulama kataloğuna özel ikonu, arama/filtreleme ve favori desteğiyle eklendi.
+     - **Doğrudan Başlatma:** ❌ **Şu anda desteklenmiyor** (`com.rectv.shot.MainActivity` dışarıdan tetiklenebilir bir `ACTION_VIEW` + `BROWSABLE` deep link şeması veya DIAL alıcısı barındırmamaktadır).
+     - **Alternatif Akış (Fallback):** RecTV kartına dokunulduğunda sahte başarı mesajı verilmez; teknik kısıtı açıklayan Türkçe bilgilendirme penceresi açılır ve tek dokunuşla televizyonun **Ana Ekranını (`KEYCODE_HOME`)** açarak manuel seçimi kolaylaştırır.
+3. **Hızlı Başlatma Kısayolları (Deep Link — Port `6466`):**
+   - **YouTube, Netflix, Prime Video, Disney+, Spotify, Exxen, BluTV, Gain, TOD, Twitch, TVX ve RecTV** için 3 sütunlu uygulama ızgarası, kategori filtreleri (`Tümü`, `TV'de Yüklü`, `Favoriler`, `Medya`, `Araçlar`), yıldız (`★`) ile favorilere sabitleme ve anlık arama filtresi sunar.
+4. **Özel Deep Link Başlatıcı:**
+   - Ekranın altındaki **Özel Deep Link** alanı ile güvenli şemalara sahip (`https://...`, `vnd.youtube://...`, `tvx://` vb.) uygulama bağlantılarını doğrudan televizyona gönderebilirsiniz.
 
 ---
 
@@ -262,6 +278,7 @@ app/src/main/java/com/yunusinan/vestelremote/
 │   │   └── PreferencesManager.kt      # Kayıtlı cihazlar, sertifika parmak izleri ve kullanıcı ayarları
 │   ├── protocol/
 │   │   ├── AndroidTvRemoteV2Client.kt # Port 6467 eşleştirme & Port 6466 canlı kumanda oturumu
+│   │   ├── AppLauncherEngine.kt       # Kanıt düzeyli (RemoteAppLink / DIAL) uygulama başlatma motoru
 │   │   ├── RemoteProtocol.kt          # Polo/Remote v2 durum makinesi ve paket doğrulayıcılar
 │   │   ├── ProtoUtils.kt              # Hafif, çerçeve korumalı Protobuf varint kodlayıcı/çözücü
 │   │   ├── TvDiscoveryManager.kt      # NsdManager (mDNS) ve SSDP keşif yöneticisi
@@ -271,8 +288,8 @@ app/src/main/java/com/yunusinan/vestelremote/
 │   │   └── MockTvClient.kt            # Donanımsız testler için sanal TV istemcisi
 │   └── repository/
 │       ├── TvRepository.kt            # Domain-Data sözleşmesi
-│       └── TvRepositoryImpl.kt        # Oturum, keşif ve kalıcılık orkestrasyonu
-├── domain/model/                      # TvDevice, TvCommand, ConnectionStatus, AppItem, InputSource vb.
+│       └── TvRepositoryImpl.kt        # Oturum, keşif, başlatıcı ve kalıcılık orkestrasyonu
+├── domain/model/                      # TvDevice, TvCommand, ConnectionStatus, TvApp, InputSource vb.
 └── ui/
     ├── components/                    # VestelBottomNavigationBar, DPadControl, TouchpadControl vb.
     ├── screens/                       # Dashboard, Remote, Apps, Inputs, Devices, Settings ekranları
@@ -286,6 +303,7 @@ Detaylı teknik belgeler için `docs/` dizinine göz atabilirsiniz:
 - [Yazılım Mimarisi (`docs/ARCHITECTURE.md`)](docs/ARCHITECTURE.md)
 - [Protokol Araştırması (`docs/PROTOCOL_RESEARCH.md`)](docs/PROTOCOL_RESEARCH.md)
 - [Eşleştirme Denetimi ve Onarım Raporu (`docs/PAIRING_AUDIT_20261017_TR.md`)](docs/PAIRING_AUDIT_20261017_TR.md)
+- [TVX ve RecTV Statik APK Analizi (`docs/development/tvx-rectv-apk-analysis.md`)](docs/development/tvx-rectv-apk-analysis.md)
 - [Uyumluluk Matrisi (`docs/COMPATIBILITY.md`)](docs/COMPATIBILITY.md)
 
 ---
@@ -311,7 +329,7 @@ Uygulama yalnızca yerel ağ üzerinden televizyon keşfi, bağlantısı ve doku
 - **%100 Yerel Ağ (LAN) İletişimi:** Uygulama hiçbir bulut sunucusuna, analitik servisine veya üçüncü taraf API'ye veri göndermez. Tüm iletişim doğrudan telefon ile televizyon arasında yerel Wi-Fi ağı üzerinde gerçekleşir.
 - **Android Keystore & mTLS:** İstemci özel anahtarı (`2048-bit RSA`) Android Keystore içinde üretilir ve uygulama dışına çıkarılamaz.
 - **SHA-256 Sertifika Sabitleme:** Eşleştirilen televizyonun X.509 sertifika parmak izi kaydedilir ve her Port `6466` oturumunda doğrulanır.
-- **Sızıntı Korumalı Teşhis ve Ekran Görüntüleri:** `Teşhis Kopyala` özelliği PIN kodlarını, özel anahtarları veya eşleştirme sırlarını asla kaydetmez. Belgelerdeki ekran görüntülerinde yerel IP adresleri (`192.168.1.XXX`) maskelenmiştir.
+- **Sızıntı Korumalı Teşhis ve Ekran Görüntüleri:** `Tanılama Bilgilerini Kopyala` özelliği PIN kodlarını, özel anahtarları veya eşleştirme sırlarını asla kaydetmez; uygulama başlatma teşhislerinde yerel IP adresleri `<tv-host>` olarak maskelenir. Belgelerdeki ekran görüntülerinde yerel IP adresleri (`192.168.1.XXX`) maskelenmiştir.
 
 ---
 
@@ -341,7 +359,7 @@ Uygulama yalnızca yerel ağ üzerinden televizyon keşfi, bağlantısı ve doku
 
 ## 15. Test Süreçleri
 
-Proje; Protobuf çerçeveleme, SHA-256 PIN kriptografisi, eşleştirme durum makinesi, gerçek loopback mTLS soket oturumu, ses kaydırıcısı kare birleştirme/iptal mantığı, DIAL XML ayrıştırma ve gizlilik sızıntısı kontrollerini kapsayan **37 adet birim ve regresyon testi** içerir:
+Proje; Protobuf çerçeveleme, SHA-256 PIN kriptografisi, eşleştirme durum makinesi, gerçek loopback mTLS soket oturumu, ses kaydırıcısı kare birleştirme/iptal mantığı, DIAL XML ayrıştırma, `AppLauncherEngine` TVX/RecTV başlatma stratejileri, URI doğrulama ve gizlilik sızıntısı kontrollerini kapsayan **47 adet birim ve regresyon testi** içerir:
 
 ```powershell
 .\gradlew.bat testDebugUnitTest
@@ -351,7 +369,8 @@ Proje; Protobuf çerçeveleme, SHA-256 PIN kriptografisi, eşleştirme durum mak
 
 ## 16. Bilinen Sınırlamalar
 
-- **Uygulama Listesi Keşfi (DIAL vs. Tam Paket Listesi):** Android TV Remote v2 (`Port 6466`) protokolü televizyonda yüklü tüm uygulamaların listesini döndürmez. Yalnızca DIAL (`Port 8008`) destekleyen uygulamaların kurulu/çalışır durumu sorgulanabilir; diğer popüler yayın uygulamaları Deep Link kısayollarıyla başlatılır.
+- **RecTV (`com.rectv.shot`) Doğrudan Başlatma Kısıtı:** RecTV uygulamasının manifest dosyasında dışarıdan çağrılabilir bir `ACTION_VIEW` + `BROWSABLE` deep link şeması veya DIAL servisi bulunmadığından Android TV Remote v2 protokolü üzerinden doğrudan başlatılamaz. Uygulama bu durumu kullanıcıya açıklar ve tek dokunuşla TV Ana Ekranını (`HOME`) açma seçeneği sunar.
+- **Uygulama Listesi Keşfi (DIAL vs. Tam Paket Listesi):** Android TV Remote v2 (`Port 6466`) protokolü televizyonda yüklü tüm uygulamaların listesini döndürmez. Yalnızca DIAL (`Port 8008`) destekleyen uygulamaların kurulu/çalışır durumu ağ üzerinden sorgulanabilir; diğer uygulamalar Deep Link kısayollarıyla başlatılır.
 - **Android TV Olmayan Eski Vestel Modelleri:** Linux tabanlı eski Vestel Smart Center anakartlı (MB90, MB100, MB130, MB211 vb.) televizyonlar Android TV Remote v2 protokolünü desteklemez.
 - **Derin Uyku (Standby) Uyandırma:** Televizyon derin uykudayken Wi-Fi arayüzünü kapatıyorsa Wake-on-LAN paketleri televizyonun ağ kartı/ayarlarına bağlı olarak sınırlı çalışabilir.
 - **DHCP IP Değişimi:** Modem televizyona yeni bir IP adresi atarsa **Cihazlar** ekranından yeniden tarama yapılması gerekebilir.

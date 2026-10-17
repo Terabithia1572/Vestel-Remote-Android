@@ -10,6 +10,7 @@ interface TvRepository {
     val discoveredDevices: StateFlow<List<TvDevice>>
     val protocolEvents: StateFlow<List<ProtocolEvent>>
     val connectionDiagnostics: StateFlow<List<ConnectionDiagnostic>>
+    val appLaunchDiagnostics: StateFlow<List<AppLaunchDiagnostic>>
     val volume: StateFlow<Int>
     val isVolumeReportedByTv: StateFlow<Boolean>
     val isMuted: StateFlow<Boolean>

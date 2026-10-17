@@ -128,10 +128,13 @@ class MainActivity : ComponentActivity() {
                                     favoriteAppIds = uiState.favoriteAppIds,
                                     connectionStatus = uiState.connectionStatus,
                                     isAppDiscoveryRunning = uiState.isAppDiscoveryRunning,
+                                    lastLaunchFeedback = uiState.lastAppLaunchFeedback,
                                     onLaunchApp = viewModel::onLaunchApp,
                                     onToggleFavorite = viewModel::onToggleFavorite,
                                     onRefreshInstalledApps = viewModel::onRefreshInstalledApps,
-                                    onLaunchCustomDeepLink = viewModel::onLaunchCustomDeepLink
+                                    onLaunchCustomDeepLink = viewModel::onLaunchCustomDeepLink,
+                                    onDismissLaunchFeedback = viewModel::onDismissAppLaunchFeedback,
+                                    onOpenTvHomeForApp = viewModel::onOpenTvHomeForApp
                                 )
                                 3 -> InputsScreen(
                                     currentInputName = uiState.currentInput,
@@ -140,6 +143,7 @@ class MainActivity : ComponentActivity() {
                                 4 -> SettingsScreen(
                                     activeDevice = uiState.activeDevice,
                                     connectionDiagnostics = uiState.connectionDiagnostics,
+                                    appLaunchDiagnostics = uiState.appLaunchDiagnostics,
                                     currentLanguage = uiState.language,
                                     currentTheme = uiState.theme,
                                     hapticsEnabled = uiState.hapticsEnabled,

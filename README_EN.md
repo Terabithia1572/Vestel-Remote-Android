@@ -9,7 +9,7 @@
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20%7C%20Material%203-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![Target Phone](https://img.shields.io/badge/Verified%20Phone-Samsung%20Galaxy%20S24%20Ultra-1428A0?logo=samsung&logoColor=white)](#4-supported-and-verified-hardware)
 [![Target TV](https://img.shields.io/badge/Verified%20TV-Vestel%2055QG9960%20(GoogleTV7288)-E30613)](#4-supported-and-verified-hardware)
-[![Release](https://img.shields.io/badge/Release-v1.0.0--beta.2-orange)](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.0--beta.3-orange)](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **Developed and adapted for Android TV by [Yunus İNAN](https://github.com/Terabithia1572)**  
@@ -97,9 +97,9 @@ This release has been verified end-to-end on physical hardware using a **Samsung
 - **📌 Server Certificate Pinning:** Captures and persists the SHA-256 fingerprint of the TV's X.509 certificate during pairing and enforces certificate verification on subsequent port `6466` control sessions.
 - **🏠 Home Dashboard (`Panel`):** Displays the connected television (`GoogleTV7288`), model (`Vestel 55QG9960`), power button, stabilized volume slider (`-` / `+` and `Mute`), 4-tile quick action grid (`Home`, `Back`, `Assistant`, `Wake TV`), active input card, and a timestamped **Protocol Event Log**.
 - **🎮 Ergonomic Remote Controller (`Kumanda`):** Circular tactile D-Pad, vertical volume/channel rockers, media playback row, and an expandable `...` drawer housing the Touchpad, broadcast color keys, and `0–9` numeric keypad.
-- **🚀 Hybrid Application Launcher (`Uygulamalar`):** DIAL (`Port 8008`) status verification (`Running` / `Installed`), Quick Launch Shortcuts (Deep Link) grid, and a custom URI/package launcher.
+- **🚀 Hybrid Application Launcher (`Uygulamalar`):** DIAL (`Port 8008`) status verification (`Running` / `Installed`), custom **TVX (`com.tvx.tv`)** and **RecTV (`com.rectv.shot`)** catalog integration, evidence-based Deep Link launching via `AppLauncherEngine`, search/filtering, favorites, and app launch diagnostics.
 - **🔌 Input Sources (`Girişler`):** 2-column HDMI / Live TV / AV selection grid with an active source highlight badge.
-- **🩺 Connection Diagnostics & Grouped Settings (`Ayarlar`):** One-tap `Copy Diagnostics` export without exposing personal data, Device Management access, language/theme/haptic toggles, and a one-tap disconnect button.
+- **🩺 Connection & App Launch Diagnostics (`Ayarlar`):** One-tap `Copy Diagnostics` export for both pairing/connection attempts and app launch dispatches without exposing personal data, Device Management access, language/theme/haptic toggles, and a one-tap disconnect button.
 
 ---
 
@@ -160,7 +160,7 @@ All screenshots below were captured on a **Samsung Galaxy S24 Ultra** actively p
 
 ## 4. Supported and Verified Hardware
 
-This release (`v1.0.0-beta.2`) has been tested and confirmed working end-to-end on real physical hardware:
+This release (`v1.0.0-beta.3`) has been tested and confirmed working end-to-end on real physical hardware:
 
 | Component | Verified Device / Model | Status |
 | :--- | :--- | :--- |
@@ -168,14 +168,16 @@ This release (`v1.0.0-beta.2`) has been tested and confirmed working end-to-end 
 | **Television** | **Vestel 55QG9960 4K QLED Android TV** (Advertised as `GoogleTV7288`) | ✅ Verified |
 | **Other Compatible TVs** | Android TV and Google TV models exposing `Android TV Remote Service v2` (`_androidtvremote2._tcp`) | ✅ Compatible |
 | **Discovery & Pairing** | Local Wi-Fi mDNS / SSDP discovery and Port `6467` mTLS 6-digit PIN pairing | ✅ Verified |
-| **Live Remote & Volume / HDMI** | Port `6466` session, D-Pad, stabilized volume slider, HDMI input switching & app launching | ✅ Verified |
+| **Live Remote & Volume / HDMI** | Port `6466` session, D-Pad, stabilized volume slider & HDMI input switching | ✅ Verified |
+| **TVX Remote Launch (`com.tvx.tv`)** | Direct launch on the physical TV via Android TV Remote v2 `RemoteAppLinkLaunchRequest` (`tvx://`) | ✅ Verified |
+| **RecTV Catalog Integration (`com.rectv.shot`)** | Added to application catalog; direct launch not supported (manual TV Home `HOME` navigation fallback) | ℹ️ Catalog + Fallback |
 
 ---
 
 ## 5. Installation
 
 ### Option 1: Install Pre-Built APK from GitHub Releases
-1. Download the latest `app-debug.apk` asset from the **[Releases](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)** page onto your Android smartphone.
+1. Download the latest `Vestel-Remote-v1.0.0-beta.3-debug.apk` asset from the **[Releases](https://github.com/Terabithia1572/Vestel-Remote-Android/releases)** page onto your Android smartphone.
 2. Open the downloaded APK file and allow installation from unknown sources if prompted.
 
 ### Option 2: Install via ADB (Android Debug Bridge)
@@ -214,15 +216,29 @@ The **Remote** screen is designed for ergonomic one-handed operation:
 
 ## 8. Application Launcher & DIAL Discovery
 
-The **Applications** screen combines two complementary Android TV launch mechanisms transparently:
+The **Applications** screen combines Android TV protocol capabilities transparently and clearly distinguishes installation discovery from remote launch evidence levels:
 
 1. **TV-Verified Applications (DIAL — Port `8008`):**
    - Queries the TV's local DIAL REST server (`http://<TV_IP>:8008/apps/<AppName>`) to verify whether DIAL-capable apps such as **YouTube** and **Netflix** are installed on the TV and whether they are currently `Running` (`Açık`) or `Installed` (`Kurulu`).
    > **Protocol Note:** Standard Android TV Remote v2 (`Port 6466`) and DIAL (`Port 8008`) protocols do not expose a full list of all installed APK packages on the television unless ADB developer mode is enabled.
-2. **Quick Launch Shortcuts (Deep Link — Port `6466`):**
-   - Provides a 2-column grid for **YouTube, Netflix, Prime Video, Disney+, Spotify, Exxen, BluTV, Gain, TOD, and Twitch** with star (`★`) pinning and instant search filtering. Apps launch via Android TV Remote v2 `RemoteAppLinkLaunchRequest` (Field `90`) with DIAL fallback.
-3. **Custom Deep Link / Package Launcher:**
-   - The **Custom Deep Link** bar at the bottom of the screen allows sending any `https://...`, `vnd.youtube://...`, or custom app URI directly to the television.
+2. **Custom Android TV Applications (TVX & RecTV Integration):**
+   - Applications confirmed installed by the user on the physical television are marked as **`Installed on TV (User-Confirmed)`** without faking DIAL verification and are rendered with custom Jetpack Compose vector icons in the 3-column grid:
+   - **TVX (`com.tvx.tv`):**
+     - **Display Name:** `TVX`
+     - **Package Name:** `com.tvx.tv`
+     - **Deep Link:** `tvx://` (verified as `ACTION_VIEW` + `CATEGORY_BROWSABLE` on `com.tvx.tv.MainActivity`)
+     - **Launch Method:** Android TV Remote v2 `RemoteAppLinkLaunchRequest` (Protobuf Field `90`)
+     - **Status:** ✅ **Successfully tested and verified opening directly on the physical Vestel 55QG9960 (`GoogleTV7288`) television.**
+   - **RecTV (`com.rectv.shot`):**
+     - **Display Name:** `RecTV`
+     - **Package Name:** `com.rectv.shot`
+     - **Status:** Added to the application catalog with a custom Compose icon, search/filter, and favorites support.
+     - **Direct Launching:** ❌ **Not currently supported** (`com.rectv.shot.MainActivity` does not expose an external `ACTION_VIEW` + `BROWSABLE` deep link scheme or DIAL receiver).
+     - **Fallback:** Tapping RecTV never displays a fake success toast; instead, it presents a clear explanation dialog with a one-tap action to open the television's **Home screen (`KEYCODE_HOME`)** for manual selection.
+3. **Quick Launch Shortcuts (Deep Link — Port `6466`):**
+   - Provides a 3-column grid for **YouTube, Netflix, Prime Video, Disney+, Spotify, Exxen, BluTV, Gain, TOD, Twitch, TVX, and RecTV** with category filters (`All`, `Installed on TV`, `Favorites`, `Media`, `Tools`), star (`★`) pinning, and instant search filtering.
+4. **Custom Deep Link Launcher:**
+   - The **Custom Deep Link** bar at the bottom of the screen allows sending validated app URIs (`https://...`, `vnd.youtube://...`, `tvx://`, etc.) directly to the television.
 
 ---
 
@@ -262,6 +278,7 @@ app/src/main/java/com/yunusinan/vestelremote/
 │   │   └── PreferencesManager.kt      # Persisted devices, pinned fingerprints & user preferences
 │   ├── protocol/
 │   │   ├── AndroidTvRemoteV2Client.kt # Port 6467 pairing & Port 6466 live remote session
+│   │   ├── AppLauncherEngine.kt       # Evidence-based (RemoteAppLink / DIAL) application launcher engine
 │   │   ├── RemoteProtocol.kt          # Polo/Remote v2 state machines & strict frame validators
 │   │   ├── ProtoUtils.kt              # Lightweight varint-framed Protobuf encoder/decoder
 │   │   ├── TvDiscoveryManager.kt      # NsdManager (mDNS) and SSDP discovery manager
@@ -271,8 +288,8 @@ app/src/main/java/com/yunusinan/vestelremote/
 │   │   └── MockTvClient.kt            # Virtual TV simulator for hardware-free testing
 │   └── repository/
 │       ├── TvRepository.kt            # Domain-Data contract
-│       └── TvRepositoryImpl.kt        # Session, discovery & persistence orchestration
-├── domain/model/                      # TvDevice, TvCommand, ConnectionStatus, AppItem, InputSource, etc.
+│       └── TvRepositoryImpl.kt        # Session, discovery, launcher & persistence orchestration
+├── domain/model/                      # TvDevice, TvCommand, ConnectionStatus, TvApp, InputSource, etc.
 └── ui/
     ├── components/                    # VestelBottomNavigationBar, DPadControl, TouchpadControl, etc.
     ├── screens/                       # Dashboard, Remote, Apps, Inputs, Devices, Settings screens
@@ -286,6 +303,7 @@ Additional technical documentation is available in `docs/`:
 - [Architecture Design (`docs/ARCHITECTURE.md`)](docs/ARCHITECTURE.md)
 - [Protocol Research (`docs/PROTOCOL_RESEARCH.md`)](docs/PROTOCOL_RESEARCH.md)
 - [Pairing Audit & Repair Report (`docs/PAIRING_AUDIT_20261017_TR.md`)](docs/PAIRING_AUDIT_20261017_TR.md)
+- [TVX & RecTV Static APK Analysis (`docs/development/tvx-rectv-apk-analysis.md`)](docs/development/tvx-rectv-apk-analysis.md)
 - [Compatibility Matrix (`docs/COMPATIBILITY.md`)](docs/COMPATIBILITY.md)
 
 ---
@@ -311,7 +329,7 @@ The application requests only the minimal permissions required for local network
 - **100% Local Network (LAN) Operation:** No telemetry, analytics, or cloud servers are contacted. All traffic stays strictly on the user's local Wi-Fi network.
 - **Android Keystore & mTLS:** The client RSA private key (`2048-bit`) is generated inside the Android Keystore and never leaves secure storage.
 - **SHA-256 Certificate Pinning:** The paired TV's X.509 certificate fingerprint is persisted and verified on every subsequent Port `6466` control session.
-- **Sanitized Diagnostics & Screenshots:** The in-app `Copy Diagnostics` feature never logs PIN codes, private keys, or pairing secrets. Local IP addresses in documentation screenshots are redacted (`192.168.1.XXX`).
+- **Sanitized Diagnostics & Screenshots:** The in-app `Copy Diagnostics` feature never logs PIN codes, private keys, or pairing secrets, and masks local IP addresses as `<tv-host>` in app launch diagnostics. Local IP addresses in documentation screenshots are redacted (`192.168.1.XXX`).
 
 ---
 
@@ -341,7 +359,7 @@ The application requests only the minimal permissions required for local network
 
 ## 15. Testing
 
-The repository includes **37 unit and regression tests** covering Protobuf framing, SHA-256 PIN cryptography, pairing state machine validation, real loopback mTLS socket sessions, volume slider coalescing/cancellation, DIAL XML parsing, and secret-redaction checks:
+The repository includes **47 unit and regression tests** covering Protobuf framing, SHA-256 PIN cryptography, pairing state machine validation, real loopback mTLS socket sessions, volume slider coalescing/cancellation, DIAL XML parsing, `AppLauncherEngine` TVX/RecTV launch strategies, URI validation, and secret-redaction checks:
 
 ```powershell
 .\gradlew.bat testDebugUnitTest
@@ -351,6 +369,7 @@ The repository includes **37 unit and regression tests** covering Protobuf frami
 
 ## 16. Known Limitations
 
+- **RecTV (`com.rectv.shot`) Direct Launch Limitation:** Because the RecTV APK manifest does not register an exported `ACTION_VIEW` + `BROWSABLE` deep link scheme or a DIAL service, direct remote launching over Android TV Remote v2 is not supported. The app explains this limitation transparently and offers a one-tap TV Home screen (`HOME`) fallback.
 - **App Discovery (DIAL vs. Full Package Enumeration):** The Android TV Remote v2 (`Port 6466`) protocol does not provide a list of all installed APK packages on the TV. Only DIAL-supported applications (`Port 8008`) can be queried for installed/running status without ADB; other streaming apps are launched via Deep Link shortcuts.
 - **Unsupported Legacy Models:** Non-Android Vestel Smart Center televisions (Linux-based MB90, MB100, MB130, MB211 boards) use a different proprietary protocol and are not supported.
 - **Deep Standby Wake-on-LAN:** If the television powers down its Wi-Fi interface during deep sleep, Wake-on-LAN packets may depend on the TV's network standby setting.

@@ -140,7 +140,7 @@
 
     <!-- About Yunus İNAN & Project -->
     <string name="about_title">Hakkında</string>
-    <string name="app_version_label">Sürüm: 1.0.0 (Vestel 55QG9960 &amp; GoogleTV7288 Doğrulandı)</string>
+    <string name="app_version_label">Sürüm: 1.0.0-beta.3 (Vestel 55QG9960 &amp; GoogleTV7288 Doğrulandı)</string>
     <string name="developer_name">Geliştirici: Yunus İNAN</string>
     <string name="developer_github">GitHub: https://github.com/Terabithia1572</string>
     <string name="developer_attribution">Android uygulaması geliştirme ve Vestel Android TV uyarlaması: Yunus İNAN</string>

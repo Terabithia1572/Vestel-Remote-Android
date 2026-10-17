@@ -31,6 +31,8 @@ data class MainUiState(
     val savedDevices: List<TvDevice> = emptyList(),
     val protocolEvents: List<ProtocolEvent> = emptyList(),
     val connectionDiagnostics: List<ConnectionDiagnostic> = emptyList(),
+    val appLaunchDiagnostics: List<AppLaunchDiagnostic> = emptyList(),
+    val lastAppLaunchFeedback: AppLaunchDiagnostic? = null,
     val favoriteAppIds: Set<String> = setOf("youtube", "netflix", "prime_video", "disney_plus"),
     val appCatalog: List<TvApp> = TvApp.DEFAULT_CATALOG,
     val isAppDiscoveryRunning: Boolean = false,
@@ -115,6 +117,16 @@ class MainViewModel(
         viewModelScope.launch {
             repository.connectionDiagnostics.collect { diagnostics ->
                 _uiState.update { it.copy(connectionDiagnostics = diagnostics) }
+            }
+        }
+        viewModelScope.launch {
+            repository.appLaunchDiagnostics.collect { launchDiags ->
+                _uiState.update {
+                    it.copy(
+                        appLaunchDiagnostics = launchDiags,
+                        lastAppLaunchFeedback = launchDiags.lastOrNull() ?: it.lastAppLaunchFeedback
+                    )
+                }
             }
         }
         viewModelScope.launch {
@@ -345,6 +357,18 @@ class MainViewModel(
         triggerHaptic()
         viewModelScope.launch {
             repository.launchApp(app)
+        }
+    }
+
+    fun onDismissAppLaunchFeedback() {
+        _uiState.update { it.copy(lastAppLaunchFeedback = null) }
+    }
+
+    fun onOpenTvHomeForApp() {
+        triggerHaptic()
+        _uiState.update { it.copy(lastAppLaunchFeedback = null) }
+        viewModelScope.launch {
+            repository.sendCommand(TvCommand.Home)
         }
     }
 

@@ -25,29 +25,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yunusinan.vestelremote.R
+import com.yunusinan.vestelremote.domain.model.AppCatalogFilter
 import com.yunusinan.vestelremote.domain.model.AppDiscoveryState
+import com.yunusinan.vestelremote.domain.model.AppLaunchDiagnostic
+import com.yunusinan.vestelremote.domain.model.AppLaunchDispatchStatus
 import com.yunusinan.vestelremote.domain.model.ConnectionStatus
 import com.yunusinan.vestelremote.domain.model.TvApp
 import com.yunusinan.vestelremote.ui.theme.*
-
-private enum class AppFilterTab {
-    ALL,
-    INSTALLED,
-    SYSTEM,
-    FAVORITES
-}
 
 @Composable
 fun AppsScreen(
@@ -55,35 +53,26 @@ fun AppsScreen(
     favoriteAppIds: Set<String>,
     connectionStatus: ConnectionStatus,
     isAppDiscoveryRunning: Boolean,
+    lastLaunchFeedback: AppLaunchDiagnostic? = null,
     onLaunchApp: (TvApp) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onRefreshInstalledApps: () -> Unit,
     onLaunchCustomDeepLink: (title: String, uri: String) -> Unit,
+    onDismissLaunchFeedback: () -> Unit = {},
+    onOpenTvHomeForApp: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf(AppFilterTab.ALL) }
+    var selectedFilter by remember { mutableStateOf(AppCatalogFilter.ALL) }
     var showCustomDeepLinkDialog by remember { mutableStateOf(false) }
 
     val displayedApps = remember(apps, searchQuery, selectedFilter, favoriteAppIds) {
-        val byQuery = if (searchQuery.isBlank()) {
-            apps
-        } else {
-            apps.filter {
-                it.name.contains(searchQuery, ignoreCase = true) ||
-                    it.category.contains(searchQuery, ignoreCase = true) ||
-                    it.packageName.contains(searchQuery, ignoreCase = true)
-            }
-        }
-        when (selectedFilter) {
-            AppFilterTab.ALL -> byQuery
-            AppFilterTab.INSTALLED -> {
-                val verified = byQuery.filter { it.isVerifiedOnTv }
-                if (verified.isNotEmpty()) verified else byQuery.filter { it.dialName != null }
-            }
-            AppFilterTab.SYSTEM -> byQuery.filter { it.category.equals("Sistem", ignoreCase = true) }
-            AppFilterTab.FAVORITES -> byQuery.filter { favoriteAppIds.contains(it.id) }
-        }
+        TvApp.filterCatalog(
+            apps = apps,
+            searchQuery = searchQuery,
+            filterTab = selectedFilter,
+            favoriteAppIds = favoriteAppIds
+        )
     }
 
     Column(
@@ -150,7 +139,19 @@ fun AppsScreen(
                                 fontSize = 13.sp
                             ),
                             cursorBrush = SolidColor(VestelRed),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics { contentDescription = "Uygulama arama alanı" }
+                        )
+                    }
+                    if (searchQuery.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Aramayı temizle",
+                            tint = DarkTextSecondary,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clickable { searchQuery = "" }
                         )
                     }
                 }
@@ -200,23 +201,23 @@ fun AppsScreen(
         ) {
             FilterPill(
                 label = "Tümü",
-                selected = selectedFilter == AppFilterTab.ALL,
-                onClick = { selectedFilter = AppFilterTab.ALL }
+                selected = selectedFilter == AppCatalogFilter.ALL,
+                onClick = { selectedFilter = AppCatalogFilter.ALL }
             )
             FilterPill(
                 label = "Yüklüler",
-                selected = selectedFilter == AppFilterTab.INSTALLED,
-                onClick = { selectedFilter = AppFilterTab.INSTALLED }
+                selected = selectedFilter == AppCatalogFilter.INSTALLED,
+                onClick = { selectedFilter = AppCatalogFilter.INSTALLED }
             )
             FilterPill(
                 label = "Sistem",
-                selected = selectedFilter == AppFilterTab.SYSTEM,
-                onClick = { selectedFilter = AppFilterTab.SYSTEM }
+                selected = selectedFilter == AppCatalogFilter.SYSTEM,
+                onClick = { selectedFilter = AppCatalogFilter.SYSTEM }
             )
             FilterPill(
                 label = "Favoriler",
-                selected = selectedFilter == AppFilterTab.FAVORITES,
-                onClick = { selectedFilter = AppFilterTab.FAVORITES }
+                selected = selectedFilter == AppCatalogFilter.FAVORITES,
+                onClick = { selectedFilter = AppCatalogFilter.FAVORITES }
             )
             FilterPill(
                 label = "+ Özel URI",
@@ -226,6 +227,17 @@ fun AppsScreen(
         }
 
         Spacer(modifier = Modifier.height(10.dp))
+
+        // Honest Launch Status Banner (for COMMAND_SENT, LAUNCH_ACCEPTED, APPLICATION_VISIBLY_OPENED, DISPATCH_FAILED)
+        if (lastLaunchFeedback != null &&
+            lastLaunchFeedback.dispatchResult != AppLaunchDispatchStatus.UNSUPPORTED_CAPABILITY
+        ) {
+            LaunchEvidenceBanner(
+                diagnostic = lastLaunchFeedback,
+                onDismiss = onDismissLaunchFeedback
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         // 3-Column Branded App Grid (Matching Reference)
         LazyVerticalGrid(
@@ -238,7 +250,7 @@ fun AppsScreen(
                 AppGridTile(
                     app = app,
                     isFavorite = favoriteAppIds.contains(app.id),
-                    showFavoriteBadge = selectedFilter == AppFilterTab.FAVORITES,
+                    showFavoriteBadge = true,
                     onLaunch = { onLaunchApp(app) },
                     onToggleFavorite = { onToggleFavorite(app.id) }
                 )
@@ -247,10 +259,11 @@ fun AppsScreen(
             // Compact Protocol Transparency Note at Bottom of Grid
             item(span = { GridItemSpan(3) }) {
                 val verifiedCount = apps.count { it.isVerifiedOnTv }
+                val userConfirmedCount = apps.count { it.isUserConfirmedInstalled }
                 val noteText = if (verifiedCount > 0) {
-                    "Yeşil işaretli $verifiedCount uygulama TV üzerinde DIAL (Port 8008) ile doğrulandı. Diğer kısayollar Deep Link ile başlatılır."
+                    "Yeşil noktalı $verifiedCount uygulama DIAL (Port 8008) ile doğrulandı; mavi noktalı $userConfirmedCount uygulama (TVX, RecTV) kullanıcı doğrulamalı kuruludur (User-confirmed installed)."
                 } else {
-                    "DIAL (Port 8008) destekli uygulamaları TV'de doğrulamak için 'Yenile' butonunu kullanın."
+                    "Mavi noktalı uygulamalar (TVX, RecTV) kullanıcı doğrulamalı kuruludur (User-confirmed installed). DIAL (Port 8008) doğrulaması için 'Yenile' butonunu kullanın."
                 }
                 Row(
                     modifier = Modifier
@@ -282,6 +295,17 @@ fun AppsScreen(
         }
     }
 
+    // Unsupported Direct Launch Explanation Dialog (e.g., RecTV com.rectv.shot)
+    if (lastLaunchFeedback != null &&
+        lastLaunchFeedback.dispatchResult == AppLaunchDispatchStatus.UNSUPPORTED_CAPABILITY
+    ) {
+        UnsupportedAppLaunchDialog(
+            diagnostic = lastLaunchFeedback,
+            onDismiss = onDismissLaunchFeedback,
+            onOpenTvHome = onOpenTvHomeForApp
+        )
+    }
+
     if (showCustomDeepLinkDialog) {
         CustomDeepLinkDialog(
             onDismiss = { showCustomDeepLinkDialog = false },
@@ -291,6 +315,139 @@ fun AppsScreen(
             }
         )
     }
+}
+
+@Composable
+private fun LaunchEvidenceBanner(
+    diagnostic: AppLaunchDiagnostic,
+    onDismiss: () -> Unit
+) {
+    val (accentColor, statusBadgeText) = when (diagnostic.dispatchResult) {
+        AppLaunchDispatchStatus.APPLICATION_VISIBLY_OPENED -> StatusGreen to "AÇIK DOĞRULANDI"
+        AppLaunchDispatchStatus.LAUNCH_ACCEPTED -> StatusGreen to "BAŞLATMA KABUL EDİLDİ"
+        AppLaunchDispatchStatus.COMMAND_SENT -> StatusBlue to "KOMUT GÖNDERİLDİ"
+        AppLaunchDispatchStatus.DISPATCH_FAILED -> VestelRed to "GÖNDERİM HATASI"
+        AppLaunchDispatchStatus.UNSUPPORTED_CAPABILITY -> StatusYellow to "DESTEKLENMİYOR"
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(DarkSurfaceElevated)
+            .border(1.dp, accentColor.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(accentColor.copy(alpha = 0.18f))
+                .padding(horizontal = 6.dp, vertical = 3.dp)
+        ) {
+            Text(
+                text = statusBadgeText,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = accentColor
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = diagnostic.userFeedbackTr,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+            color = Color.White.copy(alpha = 0.92f),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Bildirimi kapat",
+            tint = DarkTextSecondary,
+            modifier = Modifier
+                .size(16.dp)
+                .clickable(onClick = onDismiss)
+        )
+    }
+}
+
+@Composable
+private fun UnsupportedAppLaunchDialog(
+    diagnostic: AppLaunchDiagnostic,
+    onDismiss: () -> Unit,
+    onOpenTvHome: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = DarkSurfaceElevated,
+        shape = RoundedCornerShape(22.dp),
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = StatusYellow,
+                    modifier = Modifier.size(22.dp)
+                )
+                Text(
+                    text = "${diagnostic.appDisplayName} — Başlatma Bilgisi",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color.White
+                )
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Kurulum Durumu: Kullanıcı Doğrulamalı Kurulu (User-confirmed installed)\nPaket Adı: ${diagnostic.packageName}",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = StatusBlue
+                )
+                Text(
+                    text = diagnostic.unsupportedCapabilityReason ?: diagnostic.userFeedbackTr,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.5.sp,
+                        lineHeight = 17.sp
+                    ),
+                    color = DarkTextSecondary
+                )
+                Text(
+                    text = "İsterseniz aşağıdaki düğmeyle televizyonun Android TV Ana Ekranını (HOME) açıp uygulamalar satırından ${diagnostic.appDisplayName} uygulamasını seçebilirsiniz.",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.88f)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onOpenTvHome,
+                colors = ButtonDefaults.buttonColors(containerColor = VestelRed)
+            ) {
+                Text("TV Ana Ekranını Aç (HOME)", color = Color.White)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Kapat", color = DarkTextSecondary)
+            }
+        }
+    )
 }
 
 @Composable
@@ -335,6 +492,17 @@ private fun AppGridTile(
 ) {
     val isVerified = app.isVerifiedOnTv
     val isRunning = app.discoveryState == AppDiscoveryState.VERIFIED_RUNNING
+    val isUserConfirmed = app.isUserConfirmedInstalled ||
+        app.discoveryState == AppDiscoveryState.USER_CONFIRMED_INSTALLED
+
+    val tileAccessibilityDescription = buildString {
+        append(app.name)
+        append(", ")
+        append(app.installationBadgeLabelTr)
+        if (!app.supportsDirectLaunch) {
+            append(", doğrudan başlatma bilgisi")
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -347,23 +515,25 @@ private fun AppGridTile(
                 color = when {
                     isRunning -> StatusGreen.copy(alpha = 0.55f)
                     isVerified -> StatusGreen.copy(alpha = 0.35f)
+                    isUserConfirmed -> StatusBlue.copy(alpha = 0.40f)
                     else -> DarkBorder
                 },
                 shape = RoundedCornerShape(15.dp)
             )
+            .semantics { contentDescription = tileAccessibilityDescription }
             .clickable(onClick = onLaunch)
             .padding(horizontal = 6.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Subtle DIAL verification dot in top-left corner when verified on TV
-        if (isVerified) {
+        // Top-left indicator dot: Green for DIAL-verified, Blue for User-confirmed installed (TVX, RecTV)
+        if (isVerified || isUserConfirmed) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(2.dp)
                     .size(6.dp)
                     .clip(CircleShape)
-                    .background(StatusGreen)
+                    .background(if (isVerified) StatusGreen else StatusBlue)
             )
         }
 
@@ -371,17 +541,24 @@ private fun AppGridTile(
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .size(20.dp)
+                .size(22.dp)
                 .clip(CircleShape)
+                .semantics {
+                    contentDescription = if (isFavorite) {
+                        "${app.name} favorilerden çıkar"
+                    } else {
+                        "${app.name} favorilere ekle"
+                    }
+                }
                 .clickable(onClick = onToggleFavorite),
             contentAlignment = Alignment.Center
         ) {
-            if (showFavoriteBadge) {
+            if (showFavoriteBadge || isFavorite) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                    contentDescription = stringResource(R.string.favorite_apps),
-                    tint = if (isFavorite) StatusYellow.copy(alpha = 0.85f) else Color.White.copy(alpha = 0.25f),
-                    modifier = Modifier.size(12.dp)
+                    contentDescription = null,
+                    tint = if (isFavorite) StatusYellow.copy(alpha = 0.90f) else Color.White.copy(alpha = 0.22f),
+                    modifier = Modifier.size(13.dp)
                 )
             }
         }
@@ -402,7 +579,7 @@ private fun AppGridTile(
                     fontWeight = FontWeight.Medium
                 ),
                 color = Color.White.copy(alpha = 0.92f),
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
@@ -413,6 +590,129 @@ private fun AppGridTile(
 @Composable
 private fun BrandedAppIcon(appId: String, appName: String) {
     when (appId) {
+        "tvx" -> {
+            // Matches com.tvx.tv launcher icon: pitch-black tile with gold (#F5D142) & white TVX+ and antenna motif
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF050608))
+                    .border(0.75.dp, Color(0xFF3E3516), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val w = size.width
+                    val h = size.height
+                    // Antenna rods above the 'X'
+                    drawLine(
+                        color = Color.White,
+                        start = Offset(w * 0.62f, h * 0.31f),
+                        end = Offset(w * 0.54f, h * 0.14f),
+                        strokeWidth = 1.4.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+                    drawLine(
+                        color = Color(0xFFF5D142),
+                        start = Offset(w * 0.68f, h * 0.31f),
+                        end = Offset(w * 0.77f, h * 0.14f),
+                        strokeWidth = 1.4.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = 1.3.dp.toPx(),
+                        center = Offset(w * 0.54f, h * 0.14f)
+                    )
+                    drawCircle(
+                        color = Color(0xFFF5D142),
+                        radius = 1.3.dp.toPx(),
+                        center = Offset(w * 0.77f, h * 0.14f)
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(top = 5.dp)
+                ) {
+                    Text(
+                        text = "TV",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color(0xFFF5D142)
+                    )
+                    Text(
+                        text = "X",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black
+                        ),
+                        color = Color.White
+                    )
+                    Text(
+                        text = "+",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black
+                        ),
+                        color = Color(0xFFF5D142)
+                    )
+                }
+            }
+        }
+        "rectv" -> {
+            // Matches com.rectv.shot adaptive icon (#FFB71C1C crimson circle with white stylized 'R' and TV antenna)
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF1A090B))
+                    .border(0.75.dp, Color(0xFF4A181C), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(Color(0xFFD32F2F), Color(0xFF9A1115))
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val w = size.width
+                        val h = size.height
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.9f),
+                            start = Offset(w * 0.46f, h * 0.25f),
+                            end = Offset(w * 0.30f, h * 0.14f),
+                            strokeWidth = 1.1.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.9f),
+                            start = Offset(w * 0.50f, h * 0.25f),
+                            end = Offset(w * 0.54f, h * 0.09f),
+                            strokeWidth = 1.1.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    }
+                    Text(
+                        text = "R",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Black,
+                            fontStyle = FontStyle.Italic
+                        ),
+                        color = Color.White,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+        }
         "netflix" -> {
             Box(
                 modifier = Modifier
@@ -807,7 +1107,7 @@ private fun CustomDeepLinkDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "Android TV Remote v2 (Field 90) üzerinden televizyonda yüklü herhangi bir uygulamanın URI bağlantısını veya Google Play sayfasını doğrudan açabilirsiniz.",
+                    text = "Android TV Remote v2 (Field 90) üzerinden televizyonda yüklü herhangi bir uygulamanın URI bağlantısını (örn. tvx:// veya vnd.youtube://) doğrudan açabilirsiniz.",
                     style = MaterialTheme.typography.bodySmall,
                     color = DarkTextSecondary
                 )
@@ -822,7 +1122,7 @@ private fun CustomDeepLinkDialog(
                 OutlinedTextField(
                     value = deepLinkUri,
                     onValueChange = { deepLinkUri = it },
-                    label = { Text("Deep Link URI (örn. vnd.youtube://)") },
+                    label = { Text("Deep Link URI (örn. tvx://)") },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -845,4 +1145,3 @@ private fun CustomDeepLinkDialog(
         }
     )
 }
-

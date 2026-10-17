@@ -42,6 +42,15 @@ class TvRepositoryImpl(
     private val _connectionDiagnostics = MutableStateFlow<List<ConnectionDiagnostic>>(emptyList())
     override val connectionDiagnostics = _connectionDiagnostics.asStateFlow()
 
+    private val _appLaunchDiagnostics = MutableStateFlow<List<AppLaunchDiagnostic>>(emptyList())
+    override val appLaunchDiagnostics: StateFlow<List<AppLaunchDiagnostic>> = _appLaunchDiagnostics.asStateFlow()
+
+    private fun recordLaunchDiagnostic(entry: AppLaunchDiagnostic) {
+        _appLaunchDiagnostics.update { entries ->
+            (entries + entry).takeLast(25)
+        }
+    }
+
     private fun beginAttempt(device: TvDevice, pairing: Boolean): AttemptDiagnostics = AttemptDiagnostics(
         ConnectionDiagnostic(host = device.ipAddress, port = if (pairing) device.pairingPort else device.port,
             service = if (pairing) "pairing" else "remote")
@@ -312,50 +321,86 @@ class TvRepositoryImpl(
     }
 
     override suspend fun launchApp(app: TvApp): Result<Boolean> {
-        logEvent(ProtocolEvent.Direction.OUTGOING, "Uygulama Başlat", "${app.name} (${app.dialName ?: app.packageName})")
-        _currentApp.value = app.name
+        val client = remoteClient
+        val dial = dialClient
+        val diagnostic = AppLauncherEngine.executeLaunch(
+            app = app,
+            isMockMode = _isMockMode.value,
+            isRemoteConnected = client != null && client.isConnected,
+            sendRemoteAppLink = { uri ->
+                client?.sendDeepLink(uri) ?: Result.failure(ProtocolFailure("Televizyona bağlı değil"))
+            },
+            launchViaDial = if (dial != null) {
+                { dialName -> dial.launchApp(dialName) }
+            } else null,
+            verifyDialRunning = if (dial != null) {
+                { dialName -> dial.isAppRunning(dialName) }
+            } else null,
+            launchViaMock = { targetApp ->
+                mockTvClient?.launchApp(targetApp) ?: Result.success(true)
+            }
+        )
+        recordLaunchDiagnostic(diagnostic)
 
-        if (_isMockMode.value) {
-            val res = mockTvClient?.launchApp(app) ?: Result.success(true)
-            refreshInstalledApps()
-            return res
-        }
-
-        // Try DIAL first if app has dialName
-        if (!app.dialName.isNullOrBlank() && dialClient != null) {
-            val dialResult = dialClient!!.launchApp(app.dialName)
-            if (dialResult.isSuccess && dialResult.getOrDefault(false)) {
+        return when (diagnostic.dispatchResult) {
+            AppLaunchDispatchStatus.APPLICATION_VISIBLY_OPENED -> {
+                _currentApp.value = app.name
+                logEvent(
+                    ProtocolEvent.Direction.INCOMING,
+                    "Uygulama Açık Doğrulandı",
+                    "${app.name} (${app.packageName}) -> ${diagnostic.protocolAcknowledgment}"
+                )
                 scope.launch { refreshInstalledApps() }
-                return Result.success(true)
+                Result.success(true)
+            }
+            AppLaunchDispatchStatus.LAUNCH_ACCEPTED -> {
+                _currentApp.value = app.name
+                logEvent(
+                    ProtocolEvent.Direction.INCOMING,
+                    "Başlatma İsteği Kabul Edildi",
+                    "${app.name} (${diagnostic.attemptedSchemeOrEndpoint}) -> ${diagnostic.protocolAcknowledgment}"
+                )
+                scope.launch { refreshInstalledApps() }
+                Result.success(true)
+            }
+            AppLaunchDispatchStatus.COMMAND_SENT -> {
+                logEvent(
+                    ProtocolEvent.Direction.OUTGOING,
+                    "Başlatma Komutu Gönderildi",
+                    "${app.name} (${app.packageName}) -> ${diagnostic.attemptedSchemeOrEndpoint}"
+                )
+                Result.success(true)
+            }
+            AppLaunchDispatchStatus.UNSUPPORTED_CAPABILITY -> {
+                logEvent(
+                    ProtocolEvent.Direction.ERROR,
+                    "Doğrudan Başlatma Desteklenmiyor",
+                    diagnostic.userFeedbackTr
+                )
+                Result.failure(UnsupportedAppLaunchException(diagnostic))
+            }
+            AppLaunchDispatchStatus.DISPATCH_FAILED -> {
+                logEvent(
+                    ProtocolEvent.Direction.ERROR,
+                    "Uygulama Başlatma Hatası",
+                    diagnostic.userFeedbackTr
+                )
+                Result.failure(AppLaunchDispatchException(diagnostic))
             }
         }
-
-        // Fallback to Android TV Remote v2 deep link
-        if (!app.deepLinkUri.isNullOrBlank() && remoteClient != null) {
-            val deepLinkResult = remoteClient!!.sendDeepLink(app.deepLinkUri)
-            if (deepLinkResult.isSuccess) {
-                return Result.success(true)
-            }
-        }
-
-        return Result.failure(Exception("Uygulama başlatılamadı"))
     }
 
     override suspend fun launchCustomDeepLink(title: String, deepLinkUri: String): Result<Boolean> {
         val cleanUri = deepLinkUri.trim()
-        if (cleanUri.isBlank()) return Result.failure(IllegalArgumentException("Geçersiz bağlantı adresi"))
-        logEvent(ProtocolEvent.Direction.OUTGOING, "Özel Uygulama Bağlantısı", "$title ($cleanUri)")
-        _currentApp.value = title.ifBlank { cleanUri }
-
-        if (_isMockMode.value) {
-            return Result.success(true)
-        }
-
-        val client = remoteClient
-        if (client != null && client.isConnected) {
-            return client.sendDeepLink(cleanUri).map { true }
-        }
-        return Result.failure(IllegalStateException("Televizyon bağlı değil"))
+        val displayTitle = title.trim().ifBlank { "Özel URI" }
+        val syntheticApp = TvApp(
+            id = "custom_uri",
+            name = displayTitle,
+            packageName = "custom.deeplink",
+            deepLinkUri = cleanUri,
+            launchStrategy = AppLaunchStrategy.REMOTE_APP_LINK
+        )
+        return launchApp(syntheticApp)
     }
 
     override suspend fun refreshInstalledApps(): Result<Int> {
@@ -370,6 +415,7 @@ class TvRepositoryImpl(
                     val state = when {
                         app.name.equals(activeMockApp, ignoreCase = true) -> AppDiscoveryState.VERIFIED_RUNNING
                         mockVerifiedIds.contains(app.id) -> AppDiscoveryState.VERIFIED_STOPPED
+                        app.isUserConfirmedInstalled -> AppDiscoveryState.USER_CONFIRMED_INSTALLED
                         else -> AppDiscoveryState.UNVERIFIED_SHORTCUT
                     }
                     app.copy(discoveryState = state)
@@ -393,7 +439,13 @@ class TvRepositoryImpl(
             val results = client.probeCatalogApps(TvApp.DEFAULT_CATALOG)
             val updated = TvApp.DEFAULT_CATALOG.map { app ->
                 val info = results[app.id]
-                app.copy(discoveryState = info?.state ?: AppDiscoveryState.UNVERIFIED_SHORTCUT)
+                val resolvedState = when {
+                    info != null && info.isVerifiedOnTv -> info.state
+                    app.isUserConfirmedInstalled -> AppDiscoveryState.USER_CONFIRMED_INSTALLED
+                    info != null -> info.state
+                    else -> AppDiscoveryState.UNVERIFIED_SHORTCUT
+                }
+                app.copy(discoveryState = resolvedState)
             }
             _appCatalog.value = updated
 

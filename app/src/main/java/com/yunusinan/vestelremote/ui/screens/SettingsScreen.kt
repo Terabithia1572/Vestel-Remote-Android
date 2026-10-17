@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yunusinan.vestelremote.R
+import com.yunusinan.vestelremote.domain.model.AppLaunchDiagnostic
 import com.yunusinan.vestelremote.domain.model.ConnectionDiagnostic
 import com.yunusinan.vestelremote.domain.model.ProtocolEvent
 import com.yunusinan.vestelremote.domain.model.TvDevice
@@ -43,6 +44,7 @@ fun SettingsScreen(
     isMockMode: Boolean,
     protocolEvents: List<ProtocolEvent>,
     connectionDiagnostics: List<ConnectionDiagnostic>,
+    appLaunchDiagnostics: List<AppLaunchDiagnostic> = emptyList(),
     onLanguageChange: (String) -> Unit,
     onThemeChange: (String) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
@@ -191,6 +193,12 @@ fun SettingsScreen(
                             appendLine("Uygulama oturumundaki son 20 bağlantı denemesi; PIN/anahtar/paket içeriği kaydedilmez.")
                             if (connectionDiagnostics.isEmpty()) appendLine("Henüz gerçek bağlantı denemesi yok.")
                             connectionDiagnostics.forEach { appendLine(it.export()); appendLine() }
+                            appendLine("--- UYGULAMA BAŞLATMA TEŞHİSİ (SON 25 DENEME) ---")
+                            if (appLaunchDiagnostics.isEmpty()) {
+                                appendLine("Henüz uygulama başlatma denemesi yok.")
+                            } else {
+                                appLaunchDiagnostics.forEach { appendLine(it.export()); appendLine() }
+                            }
                         }
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("VestelRemoteDiagnostics", payload))

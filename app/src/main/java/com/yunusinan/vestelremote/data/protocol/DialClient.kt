@@ -71,7 +71,11 @@ class DialClient(
         if (primaryName.isNullOrBlank()) {
             return@withContext AppDiscoveryInfo(
                 appId = app.id,
-                state = AppDiscoveryState.UNVERIFIED_SHORTCUT
+                state = if (app.isUserConfirmedInstalled) {
+                    AppDiscoveryState.USER_CONFIRMED_INSTALLED
+                } else {
+                    AppDiscoveryState.UNVERIFIED_SHORTCUT
+                }
             )
         }
 
